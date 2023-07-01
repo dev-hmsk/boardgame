@@ -68,3 +68,50 @@ class Board():
             self.xy_coor[all_keys] = None
             self.visual = self._generate_visual()
 
+class GamePiece():
+    def __init__(self, color, number):
+        self.name = color + "_piece_" + str(number)
+        self.xy_coor = None
+    
+    def update_position(self,xy_coor):
+        self.xy_coor = xy_coor
+
+
+class Checkers(Board):
+    def __init__(self):
+        super().__init__((8,8))
+        # List of red/black objects
+        self.white_pieces = self.create_pieces("white")
+        self.black_pieces = self.create_pieces("black")
+    
+    def board_setup(self):
+        # Place all Checker Pieces
+        for i in range (1,9):
+            # Top of Board. White Pieces
+            self._place_at_location((i,1),self.white_pieces[i-1])
+            self.white_pieces[i-1].update_position((i,1))
+            self._place_at_location((i,2),self.white_pieces[i+8-1])
+            self.white_pieces[i+8-1].update_position((i,2))
+
+            #Bottom of Board. Black Pieces
+            self._place_at_location((i,7),self.black_pieces[i-1])
+            self.black_pieces[i-1].update_position((i,7))
+            self._place_at_location((i,8),self.black_pieces[i+8-1])
+            self.black_pieces[i+8-1].update_position((i,8))
+
+        self.visual = self._generate_visual()
+    
+    def create_pieces(self, name):
+        piece_list = []
+        for i in range(1, self.x_coor + self.y_coor + 1):
+            obj = GamePiece(name, i)
+            print(type(obj))
+            piece_list.append(obj)
+        return piece_list
+    
+    def regular_movement(self,xy_coor,item):
+        super().move(xy_coor,item)
+
+    
+
+    

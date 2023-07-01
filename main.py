@@ -1,26 +1,27 @@
-from board.board import Board
+from board.board import Board, Checkers
 
 # Testing
 
-test_dim = (5, 5)
-board_1 = Board(test_dim)
-test_item1 = "test_obj_1"
-test_item2 = "test_obj_2"
-test_move1 = (1,1)
-test_move2 = (1,2)
+checkers_board = Checkers()
 
-print(board_1.visual)
-board_1.move(test_move1, test_item1)
+print(checkers_board.visual)
 
-board_1.move(test_move2, test_item2)
-board_1.move((3,3),"hewo")
-print(board_1.visual)
-board_1.move((4,4),"uwu")
-board_1.move((4,4),"whats")
-board_1.move((1,2),"this")
-print(board_1.visual)
-print(board_1.get_from_location((1,2)))
-print(board_1.remove_from_location((1, 2)))
-print(board_1.visual)
-board_1.clear_board()
-print(board_1.visual)
+# for pieces in checkers_board.white_pieces:
+#     print(pieces.name)
+#     print(pieces.xy_coor)
+
+# for pieces in checkers_board.black_pieces:
+#     print(type(pieces))
+#     print(type(pieces.name))
+#     print(pieces.xy_coor)
+print(type((checkers_board.black_pieces[1])))
+print(checkers_board.black_pieces[1].name)
+# print(type(checkers_board.white_pieces))
+
+print(checkers_board.board_setup())
+print(checkers_board.visual)
+
+piece_at_1_1 = (checkers_board.get_from_location((1,1)))
+piece_at_8_8 = (checkers_board.get_from_location((8,8)))
+print(piece_at_8_8.name)
+print(piece_at_8_8.xy_coor)
