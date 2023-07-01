@@ -46,6 +46,7 @@ class Board():
         if self.xy_coor[xy_coor] is not None:  # Something is here, return True and the piece at this location and set x,y to None
             piece_to_return = self.xy_coor[xy_coor]
             self.xy_coor[xy_coor] = None
+            self.visual = self._generate_visual()
             return True, piece_to_return, (f"{piece_to_return} is located here. Removing {piece_to_return}")
 
     def move(self, xy_coor, item): # This is one way to do it, but i could also use the above in get + remove to first check if a move if valid
@@ -56,6 +57,8 @@ class Board():
 
         if check[0] is False:
             print(check[1])
+            
+        self.visual = self._generate_visual()
 
     def get_state(self): # Gives me the dictionary in all its glory
         return self.xy_coor
