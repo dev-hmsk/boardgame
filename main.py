@@ -19,7 +19,6 @@ class Board():
         return board_coor
     
     def _place(self, xy_coor, item):
-
         if self.xy_coor[xy_coor] is None:  # If space is empty, place item and return True
             self.xy_coor[xy_coor] = item
             return True, (f"Valid move, {item} has been placed at {xy_coor}")
@@ -51,6 +50,8 @@ class Board():
     def get_state(self):
         return self.xy_coor
 
+
+# Testing 
 
 test_dim = (4, 4)
 board_1 = Board(test_dim)
