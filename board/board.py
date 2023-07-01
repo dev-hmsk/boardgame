@@ -27,7 +27,7 @@ class Board():
             visual_object += "\n"
         return visual_object
         
-    def _place(self, xy_coor, item):
+    def _place_at_location(self, xy_coor, item):
         if self.xy_coor[xy_coor] is None:  # If space is empty, place item and return True
             self.xy_coor[xy_coor] = item
             self.visual = self._generate_visual()
@@ -36,10 +36,10 @@ class Board():
         else: # If space is full, return False
             return False, (f"Invalid move, {self.xy_coor[xy_coor]} is already located at {xy_coor}")
 
-    def get(self, xy_coor): # Return whatever is at the given x,y coor
+    def get_from_location(self, xy_coor): # Return whatever is at the given x,y coor
         return self.xy_coor[xy_coor]
 
-    def remove(self, xy_coor): # Remove item at location if able
+    def remove_from_location(self, xy_coor): # Remove item at location if able
         if self.xy_coor[xy_coor]is None:
             return False, ("Nothing is here")
 
@@ -50,14 +50,14 @@ class Board():
             return True, piece_to_return, (f"{piece_to_return} is located here. Removing {piece_to_return}")
 
     def move(self, xy_coor, item): # This is one way to do it, but i could also use the above in get + remove to first check if a move if valid
-        check = self._place(xy_coor, item)
+        check = self._place_at_location(xy_coor, item)
 
         if check[0] is True:
             print(check[1])
 
         if check[0] is False:
             print(check[1])
-            
+
         self.visual = self._generate_visual()
 
     def get_state(self): # Gives me the dictionary in all its glory
