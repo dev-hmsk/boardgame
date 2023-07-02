@@ -2,55 +2,64 @@ class Board():
 
     def __init__(self, dimension):
         self.dimension = dimension  # Must be a tuple
-        self.x_coor = dimension[0]
-        self.y_coor = dimension[1]
-        self.xy_coor = self._generate_dimension()
+        self.x_coord = dimension[0]
+        self.y_coord = dimension[1]
+        self.xy_coord = self._generate_dimension()
         self.visual = self._generate_visual()
 
     def _generate_dimension(self):
         board_coor = {}
-        for x_coor in range(1, self.x_coor + 1):
-            for y_coor in range(1, self.y_coor + 1):
-                xy_coor = (x_coor,y_coor)
-                board_coor[xy_coor] = None
+        for x_coord in range(1, self.x_coord + 1):
+            for y_coord in range(1, self.y_coord + 1):
+                xy_coord = (x_coord, y_coord)
+                board_coor[xy_coord] = None
         return board_coor
     
-    def _generate_visual(self): # Iterate through all keys and represent their values visually. (1,1) starts at top left
+    def _generate_visual(self):  # Generate visual representation with coordinates on the outside
         visual_object = ""
-        for y in range(1, self.y_coor + 1):
-            for x in range(1, self.x_coor + 1):
-                xy_coor = (x, y)
-                if self.xy_coor[xy_coor] is None:
+
+        # Generate the rows with y-coordinates and board content
+        for y in range(self.y_coord, 0, -1):
+            visual_object += f"{y:2d} "  # Left-aligned y-coordinate
+            for x in range(1, self.x_coord + 1):
+                xy_coord = (x, y)
+                if self.xy_coord[xy_coord] is None:
                     visual_object += "[ ]"
                 else:
                     visual_object += "[*]"
             visual_object += "\n"
-        return visual_object
+
+        # Generate the bottom row with x-coordinates
+        visual_object += "   "
+        for x in range(1, self.x_coord + 1):
+            visual_object += f" {x} "
         
-    def _place_at_location(self, xy_coor, item):
-        if self.xy_coor[xy_coor] is None:  # If space is empty, place item and return True
-            self.xy_coor[xy_coor] = item
+        return visual_object
+
+    def _place_at_location(self, xy_coord, item):
+        if self.xy_coord[xy_coord] is None:  # If space is empty, place item and return True
+            self.xy_coord[xy_coord] = item
             self.visual = self._generate_visual()
-            return True, (f"Valid move, {item} has been placed at {xy_coor}")
+            return True, (f"Valid move, {item} has been placed at {xy_coord}")
 
         else: # If space is full, return False
-            return False, (f"Invalid move, {self.xy_coor[xy_coor]} is already located at {xy_coor}")
+            return False, (f"Invalid move, {self.xy_coord[xy_coord]} is already located at {xy_coord}")
 
-    def get_from_location(self, xy_coor): # Return whatever is at the given x,y coor
-        return self.xy_coor[xy_coor]
+    def get_from_location(self, xy_coord):  # Return whatever is at the given x,y coor
+        return self.xy_coord[xy_coord]
 
-    def remove_from_location(self, xy_coor): # Remove item at location if able
-        if self.xy_coor[xy_coor]is None:
+    def remove_from_location(self, xy_coord):  # Remove item at location
+        if self.xy_coord[xy_coord] is None:
             return False, ("Nothing is here")
 
-        if self.xy_coor[xy_coor] is not None:  # Something is here, return True and the piece at this location and set x,y to None
-            piece_to_return = self.xy_coor[xy_coor]
-            self.xy_coor[xy_coor] = None
+        if self.xy_coord[xy_coord] is not None:  # Something is here, return True and the piece at this location and set x,y to None
+            piece_to_return = self.xy_coord[xy_coord]
+            self.xy_coord[xy_coord] = None
             self.visual = self._generate_visual()
             return True, piece_to_return, (f"{piece_to_return} is located here. Removing {piece_to_return}")
 
-    def move(self, xy_coor, item): # This is one way to do it, but i could also use the above in get + remove to first check if a move if valid
-        check = self._place_at_location(xy_coor, item)
+    def move(self, xy_coord, item): # This is one way to do it, but i could also use the above in get + remove to first check if a move if valid
+        check = self._place_at_location(xy_coord, item)
 
         if check[0] is True:
             print(check[1])
@@ -60,57 +69,58 @@ class Board():
 
         self.visual = self._generate_visual()
 
-    def get_state(self): # Gives me the dictionary in all its glory
-        return self.xy_coor
+    def get_state(self):  # Gives me the dictionary in all its glory
+        return self.xy_coord
     
     def clear_board(self):
-        for all_keys in self.xy_coor:
-            self.xy_coor[all_keys] = None
+        for all_keys in self.xy_coord:
+            self.xy_coord[all_keys] = None
             self.visual = self._generate_visual()
 
 class GamePiece():
     def __init__(self, color, number):
         self.name = color + "_piece_" + str(number)
-        self.xy_coor = None
+        self.xy_coord = None
     
-    def update_position(self,xy_coor):
-        self.xy_coor = xy_coor
+    def update_position(self, xy_coord):
+        self.xy_coord = xy_coord
 
 
 class Checkers(Board):
     def __init__(self):
-        super().__init__((8,8))
+        super().__init__((8, 8))
         # List of red/black objects
         self.white_pieces = self.create_pieces("white")
         self.black_pieces = self.create_pieces("black")
     
     def board_setup(self):
         # Place all Checker Pieces
-        for i in range (1,9):
-            # Top of Board. White Pieces
-            self._place_at_location((i,1),self.white_pieces[i-1])
-            self.white_pieces[i-1].update_position((i,1))
-            self._place_at_location((i,2),self.white_pieces[i+8-1])
-            self.white_pieces[i+8-1].update_position((i,2))
+        for i in range(1, 9):
+            # Top of the Board. White Pieces
+            self._place_at_location((i, 7), self.white_pieces[i-1])
+            self.white_pieces[i-1].update_position((i, 7))
+            
+            self._place_at_location((i, 8), self.white_pieces[i+self.x_coord-1])
+            self.white_pieces[i+self.x_coord-1].update_position((i, 8))
 
-            #Bottom of Board. Black Pieces
-            self._place_at_location((i,7),self.black_pieces[i-1])
-            self.black_pieces[i-1].update_position((i,7))
-            self._place_at_location((i,8),self.black_pieces[i+8-1])
-            self.black_pieces[i+8-1].update_position((i,8))
+            # Bottom of the Board. Black Pieces
+            self._place_at_location((i, 1), self.black_pieces[i-1])
+            self.black_pieces[i-1].update_position((i,1))
+
+            self._place_at_location((i, 2), self.black_pieces[i+self.x_coord-1])
+            self.black_pieces[i+self.x_coord-1].update_position((i, 2))
 
         self.visual = self._generate_visual()
     
     def create_pieces(self, name):
         piece_list = []
-        for i in range(1, self.x_coor + self.y_coor + 1):
+        for i in range(1, self.x_coord + self.y_coord + 1):
             obj = GamePiece(name, i)
-            print(type(obj))
             piece_list.append(obj)
         return piece_list
     
-    def regular_movement(self,xy_coor,item):
-        super().move(xy_coor,item)
+    def regular_movement(self,xy_coord,item):
+        super().move(xy_coord,item)
 
     
 
