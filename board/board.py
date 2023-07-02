@@ -19,13 +19,13 @@ class Checkers_Game_Piece(Game_Piece):
         move_down_left = None
         move_down_right = None
 
-        if (xy_coord_copy[0] - 1 >= 1):  # Check Up Left. NW
+        if (xy_coord_copy[0] - 1 >= 1) and (xy_coord_copy[1] + 1 <= 8):  # Check Up Left. NW
             move_up_left = xy_coord_copy[0] - 1, xy_coord_copy[1] + 1
-        if (xy_coord_copy[0] + 1 <= 8):  # Check Up Right. NE
+        if (xy_coord_copy[0] + 1 <= 8) and (xy_coord_copy[1] + 1 <= 8):  # Check Up Right. NE
             move_up_right = xy_coord_copy[0] + 1, xy_coord_copy[1] + 1
-        if (xy_coord_copy[1] - 1 >= 1):  # Check Down Left. SW
+        if (xy_coord_copy[0] - 1 >= 1) and (xy_coord_copy[1] - 1 >= 1):  # Check Down Left. SW
             move_down_left = xy_coord_copy[0] - 1, xy_coord_copy[1] - 1
-        if (xy_coord_copy[1] + 1 <= 8):  # Check Down Right. SE
+        if (xy_coord_copy[0] + 1 <= 8) and (xy_coord_copy[1] - 1 <= 8):  # Check Down Right. SE
             move_down_right = xy_coord_copy[0] + 1, xy_coord_copy[1] - 1
         return move_up_left, move_up_right, move_down_left, move_down_right
 
@@ -86,7 +86,7 @@ class Board():
             self.visual = self._generate_visual()
             return True, piece_to_return, (f"{piece_to_return} is located here. Removing {piece_to_return}")
 
-    def move(self, xy_coord, piece): # This is one way to do it, but i could also use the above in get + remove to first check if a move if valid
+    def move(self, xy_coord, piece): # This is one way to do it, but I could also use the above in get + remove to first check if a move if valid
         check = self._place_at_location(xy_coord, piece)
         if check[0] is True:
             print(check[1])
@@ -100,7 +100,7 @@ class Board():
     def clear_board(self):
         for all_keys in self.xy_coord:
             self.xy_coord[all_keys] = None
-            self.visual = self._generate_visual()
+        self.visual = self._generate_visual()
 
 
 class Checkers_Board(Board):
@@ -110,19 +110,20 @@ class Checkers_Board(Board):
         self.white_pieces = self.create_pieces("white")
         self.black_pieces = self.create_pieces("black")
     
-    def board_setup(self):
-        # Place all Checker Pieces
+    def board_setup(self):  # Place all Checker Pieces
         for i in range(1, 9):
             # Top of the Board. White Pieces
             self._place_at_location((i, 7), self.white_pieces[i-1])
             self.white_pieces[i-1].update_position((i, 7))
             self._place_at_location((i, 8), self.white_pieces[i+self.x_coord-1])
             self.white_pieces[i+self.x_coord-1].update_position((i, 8))
+
             # Bottom of the Board. Black Pieces
             self._place_at_location((i, 1), self.black_pieces[i-1])
             self.black_pieces[i-1].update_position((i, 1))
             self._place_at_location((i, 2), self.black_pieces[i+self.x_coord-1])
             self.black_pieces[i+self.x_coord-1].update_position((i, 2))
+
         # Update Visual
         self.visual = self._generate_visual()
     
