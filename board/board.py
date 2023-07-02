@@ -1,3 +1,36 @@
+# Piece Super & Sub class
+class Game_Piece():
+    def __init__(self, color, number):
+        self.name = color + "_piece_" + str(number)
+        self.xy_coord = None
+
+    def update_position(self, xy_coord):
+        self.xy_coord = xy_coord
+
+
+class Checkers_Game_Piece(Game_Piece):
+    def __init__(self, color, number):
+        super().__init__(color, number)
+
+    def check_move(self):
+        xy_coord_copy = self.xy_coord
+        move_up_left = None
+        move_up_right = None
+        move_down_left = None
+        move_down_right = None
+
+        if (xy_coord_copy[0] - 1 >= 1):  # Check Up Left. NW
+            move_up_left = xy_coord_copy[0] - 1, xy_coord_copy[1] + 1
+        if (xy_coord_copy[0] + 1 <= 8):  # Check Up Right. NE
+            move_up_right = xy_coord_copy[0] + 1, xy_coord_copy[1] + 1
+        if (xy_coord_copy[1] - 1 >= 1):  # Check Down Left. SW
+            move_down_left = xy_coord_copy[0] - 1, xy_coord_copy[1] - 1
+        if (xy_coord_copy[1] + 1 <= 8):  # Check Down Right. SE
+            move_down_right = xy_coord_copy[0] + 1, xy_coord_copy[1] - 1
+        return move_up_left, move_up_right, move_down_left, move_down_right
+
+
+# Board Super & Sub class
 class Board():
 
     def __init__(self, dimension):
@@ -17,7 +50,6 @@ class Board():
     
     def _generate_visual(self):  # Generate visual representation with coordinates on the outside
         visual_object = ""
-
         # Generate the rows with y-coordinates and board content
         for y in range(self.y_coord, 0, -1):
             visual_object += f" {y} "  # Left-aligned y-coordinate
@@ -28,45 +60,38 @@ class Board():
                 else:
                     visual_object += "[*]"
             visual_object += "\n"
-
         # Generate the bottom row with x-coordinates
         visual_object += "   "
         for x in range(1, self.x_coord + 1):
             visual_object += f" {x} "
-        
         return visual_object
 
-    def _place_at_location(self, xy_coord, item):
-        if self.xy_coord[xy_coord] is None:  # If space is empty, place item and return True
-            self.xy_coord[xy_coord] = item
+    def _place_at_location(self, xy_coord, piece):
+        if self.xy_coord[xy_coord] is None:  # If space is empty, place piece and return True
+            self.xy_coord[xy_coord] = piece
             self.visual = self._generate_visual()
-            return True, (f"Valid move, {item} has been placed at {xy_coord}")
-
-        else: # If space is full, return False
+            return True, (f"Valid move, {piece} has been placed at {xy_coord}")
+        else:  # If space is full, return False
             return False, (f"Invalid move, {self.xy_coord[xy_coord]} is already located at {xy_coord}")
 
     def get_from_location(self, xy_coord):  # Return whatever is at the given x,y coor
         return self.xy_coord[xy_coord]
 
-    def remove_from_location(self, xy_coord):  # Remove item at location
+    def remove_from_location(self, xy_coord):  # Remove piece at location
         if self.xy_coord[xy_coord] is None:
             return False, ("Nothing is here")
-
         if self.xy_coord[xy_coord] is not None:  # Something is here, return True and the piece at this location and set x,y to None
             piece_to_return = self.xy_coord[xy_coord]
             self.xy_coord[xy_coord] = None
             self.visual = self._generate_visual()
             return True, piece_to_return, (f"{piece_to_return} is located here. Removing {piece_to_return}")
 
-    def move(self, xy_coord, item): # This is one way to do it, but i could also use the above in get + remove to first check if a move if valid
-        check = self._place_at_location(xy_coord, item)
-
+    def move(self, xy_coord, piece): # This is one way to do it, but i could also use the above in get + remove to first check if a move if valid
+        check = self._place_at_location(xy_coord, piece)
         if check[0] is True:
             print(check[1])
-
         if check[0] is False:
             print(check[1])
-
         self.visual = self._generate_visual()
 
     def get_state(self):  # Gives me the dictionary in all its glory
@@ -77,16 +102,8 @@ class Board():
             self.xy_coord[all_keys] = None
             self.visual = self._generate_visual()
 
-class GamePiece():
-    def __init__(self, color, number):
-        self.name = color + "_piece_" + str(number)
-        self.xy_coord = None
-    
-    def update_position(self, xy_coord):
-        self.xy_coord = xy_coord
 
-
-class Checkers(Board):
+class Checkers_Board(Board):
     def __init__(self):
         super().__init__((8, 8))
         # List of red/black objects
@@ -99,28 +116,25 @@ class Checkers(Board):
             # Top of the Board. White Pieces
             self._place_at_location((i, 7), self.white_pieces[i-1])
             self.white_pieces[i-1].update_position((i, 7))
-            
             self._place_at_location((i, 8), self.white_pieces[i+self.x_coord-1])
             self.white_pieces[i+self.x_coord-1].update_position((i, 8))
-
             # Bottom of the Board. Black Pieces
             self._place_at_location((i, 1), self.black_pieces[i-1])
-            self.black_pieces[i-1].update_position((i,1))
-
+            self.black_pieces[i-1].update_position((i, 1))
             self._place_at_location((i, 2), self.black_pieces[i+self.x_coord-1])
             self.black_pieces[i+self.x_coord-1].update_position((i, 2))
-
+        # Update Visual
         self.visual = self._generate_visual()
     
     def create_pieces(self, name):
         piece_list = []
         for i in range(1, self.x_coord + self.y_coord + 1):
-            obj = GamePiece(name, i)
+            obj = Checkers_Game_Piece(name, i)
             piece_list.append(obj)
         return piece_list
     
-    def regular_movement(self,xy_coord,item):
-        super().move(xy_coord,item)
+    def regular_movement(self, xy_coord, piece):
+        super().move(xy_coord, piece)
 
     
 
