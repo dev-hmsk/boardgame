@@ -20,7 +20,7 @@ class Board():
 
         # Generate the rows with y-coordinates and board content
         for y in range(self.y_coord, 0, -1):
-            visual_object += f"{y:2d} "  # Left-aligned y-coordinate
+            visual_object += f" {y} "  # Left-aligned y-coordinate
             for x in range(1, self.x_coord + 1):
                 xy_coord = (x, y)
                 if self.xy_coord[xy_coord] is None:
