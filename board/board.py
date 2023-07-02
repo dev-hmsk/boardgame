@@ -3,6 +3,7 @@ class Game_Piece():
     def __init__(self, color, number):
         self.name = color + "_piece_" + str(number)
         self.xy_coord = None
+        self.team = color
 
     def update_position(self, xy_coord):
         self.xy_coord = xy_coord
@@ -14,27 +15,27 @@ class Checkers_Game_Piece(Game_Piece):
 
     def check_move(self):
         xy_coord_copy = self.xy_coord
-        move_up_left = None
-        move_up_right = None
-        move_down_left = None
-        move_down_right = None
+        move_nw = None  # NW/Up Left
+        move_ne = None  # NE/Up Right
+        move_sw = None  # SW/Down Left
+        move_se = None  # SE/Down Right
 
-        if (xy_coord_copy[0] - 1 >= 1) and (xy_coord_copy[1] + 1 <= 8):  # Check Up Left. NW
-            move_up_left = xy_coord_copy[0] - 1, xy_coord_copy[1] + 1
-        if (xy_coord_copy[0] + 1 <= 8) and (xy_coord_copy[1] + 1 <= 8):  # Check Up Right. NE
-            move_up_right = xy_coord_copy[0] + 1, xy_coord_copy[1] + 1
-        if (xy_coord_copy[0] - 1 >= 1) and (xy_coord_copy[1] - 1 >= 1):  # Check Down Left. SW
-            move_down_left = xy_coord_copy[0] - 1, xy_coord_copy[1] - 1
-        if (xy_coord_copy[0] + 1 <= 8) and (xy_coord_copy[1] - 1 <= 8):  # Check Down Right. SE
-            move_down_right = xy_coord_copy[0] + 1, xy_coord_copy[1] - 1
-        return move_up_left, move_up_right, move_down_left, move_down_right
+        if (xy_coord_copy[0] - 1 >= 1) and (xy_coord_copy[1] + 1 <= 8):  # Check NW
+            move_nw = xy_coord_copy[0] - 1, xy_coord_copy[1] + 1
+        if (xy_coord_copy[0] + 1 <= 8) and (xy_coord_copy[1] + 1 <= 8):  # Check NE
+            move_ne = xy_coord_copy[0] + 1, xy_coord_copy[1] + 1
+        if (xy_coord_copy[0] - 1 >= 1) and (xy_coord_copy[1] - 1 >= 1):  # Check SW
+            move_sw = xy_coord_copy[0] - 1, xy_coord_copy[1] - 1
+        if (xy_coord_copy[0] + 1 <= 8) and (xy_coord_copy[1] - 1 <= 8):  # Check SE
+            move_se = xy_coord_copy[0] + 1, xy_coord_copy[1] - 1
+        return move_nw, move_ne, move_sw, move_se
 
 
 # Board Super & Sub class
 class Board():
 
     def __init__(self, dimension):
-        self.dimension = dimension  # Must be a tuple
+        self.dimension = dimension
         self.x_coord = dimension[0]
         self.y_coord = dimension[1]
         self.xy_coord = self._generate_dimension()
@@ -49,6 +50,30 @@ class Board():
         return board_coor
     
     def _generate_visual(self):  # Generate visual representation with coordinates on the outside
+        """
+        Currently this exists as a visual debugging tool 
+        during game logic testing.
+        
+        To be done at end:
+
+        The below ANSII prints {var} as blinking text in the bash terminal.
+        Keep for later use in _generate_visual static method.
+
+        After all game logic is created and functional we should abstract
+        the GUI visual away from Board(). We could possibly tie the visual
+        updates to the Board.get_state() function to then trigger a "clear" 
+        cmd in the bash terminal and re-print the visual object to simulate
+        a refreshing/updating board. This could allow us to have a Visual()
+        that only executes when we ask it to actually function as a visual
+        game within the terminal without being tied to the underlying game
+
+        var = "*"
+        var_blink = (f"\033[37;5m{var}\033[0m")
+        bracket_left = "["
+        bracket_right = "]"
+        print(bracket_left+var_blink+bracket_right)
+        """
+        
         visual_object = ""
         # Generate the rows with y-coordinates and board content
         for y in range(self.y_coord, 0, -1):
@@ -134,9 +159,15 @@ class Checkers_Board(Board):
             piece_list.append(obj)
         return piece_list
     
-    def regular_movement(self, xy_coord, piece):
-        super().move(xy_coord, piece)
-
-    
-
-    
+    def regular_move(self, piece):
+        check_move = piece.check_move()
+        print(check_move)
+        if piece.team == "white":  # White starts Top and must move Down
+            sw = check_move[2]  # SW
+            se = check_move[3]  # SE
+            return sw, se
+        
+        if piece.team == "black":  # Black starts Bottom and must move Up
+            nw = check_move[0]  # NW
+            ne = check_move[1]  # NE
+            return nw, ne
