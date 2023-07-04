@@ -12,24 +12,26 @@ class Game_Piece():
 class Checkers_Game_Piece(Game_Piece):
     def __init__(self, color, number):
         super().__init__(color, number)
+        self.moves = {
+            "move_nw": None,
+            "move_ne": None,
+            "move_sw": None,
+            "move_se": None
+        }
 
-    def check_move(self):
+    def check_valid_move(self):
         xy_coord_copy = self.xy_coord
-        move_nw = None  # NW/Up Left
-        move_ne = None  # NE/Up Right
-        move_sw = None  # SW/Down Left
-        move_se = None  # SE/Down Right
 
         if (xy_coord_copy[0] - 1 >= 1) and (xy_coord_copy[1] + 1 <= 8):  # Check NW
-            move_nw = xy_coord_copy[0] - 1, xy_coord_copy[1] + 1
+            self.moves["move_nw"] = xy_coord_copy[0] - 1, xy_coord_copy[1] + 1
         if (xy_coord_copy[0] + 1 <= 8) and (xy_coord_copy[1] + 1 <= 8):  # Check NE
-            move_ne = xy_coord_copy[0] + 1, xy_coord_copy[1] + 1
+            self.moves["move_ne"] = xy_coord_copy[0] + 1, xy_coord_copy[1] + 1
         if (xy_coord_copy[0] - 1 >= 1) and (xy_coord_copy[1] - 1 >= 1):  # Check SW
-            move_sw = xy_coord_copy[0] - 1, xy_coord_copy[1] - 1
+            self.moves["move_sw"] = xy_coord_copy[0] - 1, xy_coord_copy[1] - 1
         if (xy_coord_copy[0] + 1 <= 8) and (xy_coord_copy[1] - 1 <= 8):  # Check SE
-            move_se = xy_coord_copy[0] + 1, xy_coord_copy[1] - 1
-        return move_nw, move_ne, move_sw, move_se
-
+            self.moves["move_se"] = xy_coord_copy[0] + 1, xy_coord_copy[1] - 1
+        
+        return self.moves
 
 # Board Super & Sub class
 class Board():
@@ -159,15 +161,43 @@ class Checkers_Board(Board):
             piece_list.append(obj)
         return piece_list
     
-    def regular_move(self, piece):
-        check_move = piece.check_move()
+    def is_regular_move_valid(self, piece):
+        check_move = piece.check_valid_move()
         print(check_move)
         if piece.team == "white":  # White starts Top and must move Down
-            sw = check_move[2]  # SW
-            se = check_move[3]  # SE
-            return sw, se
+            sw = piece.moves["move_sw"]  # SW
+            se = piece.moves["move_se"]  # SE
+            sw_move = "Invalid"
+            se_move = "Invalid"
+            if sw is not None:
+                sw_space = self.get_from_location(sw)
+                if sw_space is None:
+                    sw_move = "Valid"
+            if se is not None:
+                se_space = self.get_from_location(se)
+                if se_space is None:
+                    se_move = "Valid"
+                    
+            return sw_move, se_move
         
         if piece.team == "black":  # Black starts Bottom and must move Up
-            nw = check_move[0]  # NW
-            ne = check_move[1]  # NE
-            return nw, ne
+            nw = piece.moves["move_nw"]  # NW
+            ne = piece.moves["move_ne"]  # NE
+            nw_move = "Invalid"
+            ne_move = "Invalid"
+            if nw is not None:
+                nw_space = self.get_from_location(nw)
+                if nw_space is None:
+                    nw_move = "Valid"
+                    
+            if ne is not None:
+                ne_space = self.get_from_location(ne)
+                if ne_space is None:
+                    ne_move = "Valid"
+                    
+            return nw_move, ne_move
+
+    
+
+
+

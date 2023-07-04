@@ -17,13 +17,13 @@ board_state = checkers_board.get_state()
 
 # print("-" * 20)
 
-print(checkers_board.black_pieces[8].name,
-      checkers_board.black_pieces[8].xy_coord,
-      checkers_board.black_pieces[8].team)
-# print(checkers_board.black_pieces[8].check_move())
+# print(checkers_board.black_pieces[8].name,
+#       checkers_board.black_pieces[8].xy_coord,
+#       checkers_board.black_pieces[8].team)
+# print(checkers_board.black_pieces[8].check_valid_move())
 # print(checkers_board.black_pieces[9].name, checkers_board.black_pieces[9].xy_coord, checkers_board.black_pieces[9].team)
-# print(checkers_board.black_pieces[9].check_move())
+# print(checkers_board.black_pieces[9].check_valid_move())
 
-# regular_move()
-print(checkers_board.regular_move((checkers_board.black_pieces[8])))
-print(checkers_board.regular_move((checkers_board.white_pieces[8])))
+# # regular_move()
+print(checkers_board.is_regular_move_valid((checkers_board.black_pieces[8])))
+print(checkers_board.is_regular_move_valid((checkers_board.white_pieces[8])))
