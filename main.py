@@ -7,6 +7,7 @@ from board.board import *
 checkers_board = Checkers_Board()
 checkers_board.board_setup()
 print(checkers_board.visual)
+# print(checkers_board.get_state())
 
 
 def cycle_through_pieces(list_of_pieces):
@@ -24,10 +25,10 @@ def cycle_through_pieces(list_of_pieces):
         user_input = input("Enter 'q' for previous, 'e' for next or 's' to select: ")
         
         if user_input == "q":
-            index = (index + 1) % list_length
+            index = (index - 1) % list_length
             continue
         elif user_input == "e":
-            index = (index - 1) % list_length
+            index = (index + 1) % list_length
             continue
         elif user_input == "s":
             selected_piece = current_piece
@@ -61,11 +62,26 @@ def make_valid_move(valid_moves, piece):
         make_valid_move(valid_moves, piece)
 
 
+def capture_piece(capturable_moves, piece):
+    player_options = show_valid_moves(capturable_moves)
+    print(f"Here are your valid moves: {player_options}")
+    user_input = input("Make a choice: ")
+    if user_input in capturable_moves:
+        selected_move = piece.moves[user_input]
+        checkers_board.move(selected_move, piece)
+        checkers_board.remove_from_location(piece.xy_coord)
+        piece.xy_coord = selected_move  # Update (x, y) of piece.xy_coord attr
+        piece.check_valid_move()  # Update piece.moves to reflect new possible moves
+        capture_xy_coord = capturable_moves[user_input]
+        checkers_board.remove_piece(capture_xy_coord)
+    else:
+        print("Invalid Move. Try Again")
+        make_valid_move(capturable_moves, piece)
+
 def player_turn(team, name):
     print(f"Player {name} Turn")
     if team == "white":
         selected_piece = cycle_through_pieces(checkers_board.white_pieces)
-
     elif team == "black":
         selected_piece = cycle_through_pieces(checkers_board.black_pieces)
        
@@ -73,30 +89,31 @@ def player_turn(team, name):
     can_this_move = checkers_board.is_regular_move_valid(selected_piece)
     print("Debug for capture")
     print(can_this_move)
-    if any(value is False for value in can_this_move.values()): # see if there is a capturable piece
+    
+    if any(value is False for value in can_this_move.values()): # Check if there is a capturable piece
+        capturable_move = {}
         for move in can_this_move:
-            if can_this_move[move] is False:
+            if can_this_move[move] is False: # If move is illegal, check for piece
                 check_space = selected_piece.moves[move]
-                print("x y coord")
-                print(check_space)
-                if check_space is not None:
+                if check_space is not None: # If piece exists check team
                     opp_piece = checkers_board.get_from_location(check_space)
-                    if opp_piece.team != team: # If this executes its capture time
-                        print(f'You are on {team} team. and {opp_piece.name} is on {opp_piece.team}')
-                        checkers_board.can_capture(opp_piece)
-    # Otherwise all spaces are empty or without capturable pieces
-    if all(value is False for value in can_this_move.values()):  # Check to see if select piece is capable of making a valid move
-        print("This piece has no valid moves. Choose another piece")
-        player_turn(team, name)
-
+                    if opp_piece.team != team: # If enemy, check for capture conditions
+                        check_capture_condition = checkers_board.can_capture(move, opp_piece)
+                        if check_capture_condition is True: # If capturable, add move to list
+                            capturable_move[move] = opp_piece.moves[move]
+                        else:
+                            capturable_move[move] = None
+        print(f"These moves allow you to capture pieces {capturable_move}")
+        if capturable_move: # If dict is not empty
+            capture_piece(capturable_move, selected_piece)
+        else: # Otherwise, allow normal move
+            valid_moves = checkers_board.is_regular_move_valid(selected_piece)
+            make_valid_move(valid_moves, selected_piece)
     else:
-        if selected_piece.team == "white":
-            valid_white_moves = checkers_board.is_regular_move_valid(selected_piece)
-            make_valid_move(valid_white_moves, selected_piece)
-        if selected_piece.team == "black":
-            valid_black_moves = checkers_board.is_regular_move_valid(selected_piece)
-            make_valid_move(valid_black_moves, selected_piece)
+        valid_moves = checkers_board.is_regular_move_valid(selected_piece)
+        make_valid_move(valid_moves, selected_piece)
 
+    print(checkers_board.get_state())
 
 # Turn Order
 is_game_active = True

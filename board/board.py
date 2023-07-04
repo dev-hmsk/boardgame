@@ -100,7 +100,7 @@ class Board():
         visual_object += "   "
         for x in range(1, self.x_coord + 1):
             visual_object += f" {x} "
-        print("\033[H\033[J") # Visual Trick to make it look cleaner.
+        # print("\033[H\033[J") # Visual Trick to make it look cleaner.
         return visual_object
 
     def _place_at_location(self, xy_coord, piece):
@@ -114,16 +114,12 @@ class Board():
         return self.xy_coord[xy_coord]
 
     def remove_from_location(self, xy_coord, capture=False):  # Remove piece at location
-        if capture:
-            # Add capture and .pop
-            pass
-        else:
-            if self.xy_coord[xy_coord] is None:
-                return False, ("Nothing is here")
-            if self.xy_coord[xy_coord] is not None:  # Something is here, return True and the piece at this location and set x,y to None
-                piece_to_return = self.xy_coord[xy_coord]
-                self.xy_coord[xy_coord] = None
-                return True, piece_to_return, (f"{piece_to_return} is located here. Removing {piece_to_return}")
+        if self.xy_coord[xy_coord] is None:
+            return False, ("Nothing is here")
+        if self.xy_coord[xy_coord] is not None:  # Something is here, return True and the piece at this location and set x,y to None
+            piece_to_return = self.xy_coord[xy_coord]
+            self.xy_coord[xy_coord] = None
+            return True, piece_to_return, (f"{piece_to_return} is located here. Removing {piece_to_return}")
 
     def move(self, xy_coord, piece): # This is one way to do it, but I could also use the above in get + remove to first check if a move if valid
         check = self._place_at_location(xy_coord, piece)
@@ -148,25 +144,42 @@ class Checkers_Board(Board):
         self.black_pieces = self.create_pieces("black")
 
     def board_setup(self):  # Place all Checker Pieces
-        for i in range(1, 9):
-            # Top of the Board. White Pieces
-            self._place_at_location((i, 7), self.white_pieces[i-1])
-            self.white_pieces[i-1].update_position((i, 7))
-            self._place_at_location((i, 8), self.white_pieces[i+self.x_coord-1])
-            self.white_pieces[i+self.x_coord-1].update_position((i, 8))
-
-            # Bottom of the Board. Black Pieces
-            self._place_at_location((i, 1), self.black_pieces[i-1])
-            self.black_pieces[i-1].update_position((i, 1))
-            self._place_at_location((i, 2), self.black_pieces[i+self.x_coord-1])
-            self.black_pieces[i+self.x_coord-1].update_position((i, 2))
-
+        white_start_coord_unsort = []
+        black_start_coord_unsort = []
+        for location in self.xy_coord:
+            # Top of Board. White Pieces
+            if location[1] >= 6:
+                if location[0] % 2 == 1 and location[1] % 2 == 1:
+                    white_start_coord_unsort.append(location)
+                if location[0] % 2 == 0 and location[1] % 2 == 0:
+                    white_start_coord_unsort.append(location)
+            # Bottom of Board. Black Pieces
+            if location[1] <= 3:
+                if location[0] % 2 == 1 and location[1] % 2 == 1:
+                    black_start_coord_unsort.append(location)
+                if location[0] % 2 == 0 and location[1] % 2 == 0:
+                    black_start_coord_unsort.append(location)
+        white_start_coord = sorted(white_start_coord_unsort, key=lambda y: y[1])
+        black_start_coord = sorted(black_start_coord_unsort, key=lambda y: y[1], reverse=True)
+        
+        # White Piece Placement
+        for i in range(0, len(white_start_coord)):
+            white_xy_coord = (white_start_coord[i])
+            white_piece = self.white_pieces[i]
+            self._place_at_location(white_xy_coord, white_piece)
+            self.white_pieces[i].update_position(white_xy_coord)
+        # Black Piece Placement
+        for i in range(0, len(black_start_coord)):
+            black_xy_coord = (black_start_coord[i])
+            black_piece = self.black_pieces[i]
+            self._place_at_location(black_xy_coord, black_piece)
+            self.black_pieces[i].update_position(black_xy_coord)
         # Update Visual
         self.visual = self._generate_visual()
 
     def create_pieces(self, name):
         piece_list = []
-        for i in range(1, self.x_coord + self.y_coord + 1):
+        for i in range(1, 13):
             obj = Checkers_Game_Piece(name, i)
             piece_list.append(obj)
         return piece_list
@@ -208,8 +221,26 @@ class Checkers_Board(Board):
             return black_moves
     # def is_enemy_present():
 
-    # def can_capture(opp_piece):
-    #     opposite_dictionary = {
-            
-    #     }
-    #     # i need to check direction relative to piece
+    def can_capture(self, starting_loc, opp_piece):
+        # We add the opposite direction
+        # So we if start from the sw of the opp piece we check the ne
+        space_behind = opp_piece.moves[starting_loc]
+        check_space = self.get_from_location(space_behind)
+        if check_space is None:
+            print(f"Space at {space_behind} behind {opp_piece} is Empty")
+            print("You must capture this piece")
+        return True
+
+    def remove_piece(self, xy_coord):
+        piece_to_remove = self.xy_coord[xy_coord]
+        name_to_remove = piece_to_remove.name
+        if piece_to_remove is not None:
+            if piece_to_remove.team == "white":
+                for piece in self.white_pieces:
+                    if piece.name == name_to_remove:
+                        self.white_pieces.remove(piece)
+            elif piece_to_remove.team == "black":
+                for piece in self.black_pieces:
+                    if piece.name == name_to_remove:
+                        self.black_pieces.remove(piece)
+            self.xy_coord[xy_coord] = None
