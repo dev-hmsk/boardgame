@@ -53,6 +53,7 @@ def make_valid_move(valid_moves, piece):
         print("Invalid Move. Try Again")
         make_valid_move(valid_moves, piece)
 
+
 def player_turn(team, name):
     print(f"Player {name} Turn")
     if team == "white":
@@ -79,7 +80,7 @@ def player_turn(team, name):
 
 # Turn Order
 is_game_active = True
-while is_game_active == True:
+while is_game_active is True:
     WHITE_TEAM = "white"
     BLACK_TEAM = "black"
     player_1_name = "Hans"
