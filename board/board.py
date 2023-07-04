@@ -163,39 +163,42 @@ class Checkers_Board(Board):
     
     def is_regular_move_valid(self, piece):
         check_move = piece.check_valid_move()
-        print(check_move)
+        # print(check_move)
         if piece.team == "white":  # White starts Top and must move Down
             sw = piece.moves["move_sw"]  # SW
             se = piece.moves["move_se"]  # SE
-            sw_move = "Invalid"
-            se_move = "Invalid"
+            white_moves = {
+                "sw_move": False,
+                "se_move": False
+            }
             if sw is not None:
                 sw_space = self.get_from_location(sw)
                 if sw_space is None:
-                    sw_move = "Valid"
+                    white_moves["sw_move"] = True
             if se is not None:
                 se_space = self.get_from_location(se)
                 if se_space is None:
-                    se_move = "Valid"
-                    
-            return sw_move, se_move
+                    white_moves["se_move"] = True
+            return white_moves
         
         if piece.team == "black":  # Black starts Bottom and must move Up
             nw = piece.moves["move_nw"]  # NW
             ne = piece.moves["move_ne"]  # NE
-            nw_move = "Invalid"
-            ne_move = "Invalid"
+            black_moves = {
+                "nw_move": False,
+                "ne_move": False
+            }
             if nw is not None:
                 nw_space = self.get_from_location(nw)
                 if nw_space is None:
-                    nw_move = "Valid"
+                    black_moves["nw_move"] = True
                     
             if ne is not None:
                 ne_space = self.get_from_location(ne)
                 if ne_space is None:
-                    ne_move = "Valid"
+                    black_moves["ne_move"] = True
                     
-            return nw_move, ne_move
+            return black_moves
 
     
 
