@@ -33,6 +33,7 @@ class Checkers_Game_Piece(Game_Piece):
         
         return self.moves
 
+
 # Board Super & Sub class
 class Board():
 
@@ -122,7 +123,7 @@ class Board():
 
     def get_state(self):  # Gives me the dictionary in all its glory
         return self.xy_coord
-    
+
     def clear_board(self):
         for all_keys in self.xy_coord:
             self.xy_coord[all_keys] = None
@@ -134,7 +135,7 @@ class Checkers_Board(Board):
         # List of white/black objects
         self.white_pieces = self.create_pieces("white")
         self.black_pieces = self.create_pieces("black")
-    
+
     def board_setup(self):  # Place all Checker Pieces
         for i in range(1, 9):
             # Top of the Board. White Pieces
@@ -151,14 +152,14 @@ class Checkers_Board(Board):
 
         # Update Visual
         self.visual = self._generate_visual()
-    
+
     def create_pieces(self, name):
         piece_list = []
         for i in range(1, self.x_coord + self.y_coord + 1):
             obj = Checkers_Game_Piece(name, i)
             piece_list.append(obj)
         return piece_list
-    
+
     def is_regular_move_valid(self, piece):
         check_move = piece.check_valid_move()
         if piece.team == "white":  # White starts Top and must move Down
@@ -177,7 +178,7 @@ class Checkers_Board(Board):
                 if se_space is None:
                     white_moves["move_se"] = True
             return white_moves
-        
+
         if piece.team == "black":  # Black starts Bottom and must move Up
             nw = piece.moves["move_nw"]  # NW
             ne = piece.moves["move_ne"]  # NE
@@ -189,15 +190,8 @@ class Checkers_Board(Board):
                 nw_space = self.get_from_location(nw)
                 if nw_space is None:
                     black_moves["move_nw"] = True
-                    
             if ne is not None:
                 ne_space = self.get_from_location(ne)
                 if ne_space is None:
                     black_moves["move_ne"] = True
-                    
             return black_moves
-
-    
-
-
-

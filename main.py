@@ -53,13 +53,21 @@ def make_valid_move(valid_moves, piece):
         print("Invalid Move. Try Again")
         make_valid_move(valid_moves, piece)
 
-def player_turn():
-    selected_piece = cycle_through_pieces(checkers_board.white_pieces)
+def player_turn(team, name):
+    print(f"Player {name} Turn")
+    if team == "white":
+        selected_piece = cycle_through_pieces(checkers_board.white_pieces)
+
+    elif team == "black":
+        selected_piece = cycle_through_pieces(checkers_board.black_pieces)
+       
     print(selected_piece.name, selected_piece.xy_coord)
     can_this_move = checkers_board.is_regular_move_valid(selected_piece)
+    
     if all(value is False for value in can_this_move.values()):  # Check to see if select piece is capable of making a valid move
         print("This piece has no valid moves. Choose another piece")
-        player_turn()
+        player_turn(team, name)
+
     else:
         if selected_piece.team == "white":
             valid_white_moves = checkers_board.is_regular_move_valid(selected_piece)
@@ -68,4 +76,13 @@ def player_turn():
             valid_black_moves = checkers_board.is_regular_move_valid(selected_piece)
             make_valid_move(valid_black_moves, selected_piece)
 
-test1 = player_turn()
+
+# Turn Order
+is_game_active = True
+while is_game_active == True:
+    WHITE_TEAM = "white"
+    BLACK_TEAM = "black"
+    player_1_name = "Hans"
+    player_2_name = "Wes"
+    turn1 = player_turn(WHITE_TEAM, player_1_name)
+    turn2 = player_turn(BLACK_TEAM, player_2_name)
