@@ -69,6 +69,8 @@ class Board():
         that only executes when we ask it to actually function as a visual
         game within the terminal without being tied to the underlying game
 
+        We can eventually tie this to cycle_through_pieces() as well
+
         var = "*"
         var_blink = (f"\033[37;5m{var}\033[0m")
         bracket_left = "["
@@ -96,8 +98,7 @@ class Board():
     def _place_at_location(self, xy_coord, piece):
         if self.xy_coord[xy_coord] is None:  # If space is empty, place piece and return True
             self.xy_coord[xy_coord] = piece
-            self.visual = self._generate_visual()
-            return True, (f"Valid move, {piece} has been placed at {xy_coord}")
+            return True, (f"Valid move, {piece.name} has been placed at {xy_coord}")
         else:  # If space is full, return False
             return False, (f"Invalid move, {self.xy_coord[xy_coord]} is already located at {xy_coord}")
 
@@ -110,7 +111,6 @@ class Board():
         if self.xy_coord[xy_coord] is not None:  # Something is here, return True and the piece at this location and set x,y to None
             piece_to_return = self.xy_coord[xy_coord]
             self.xy_coord[xy_coord] = None
-            self.visual = self._generate_visual()
             return True, piece_to_return, (f"{piece_to_return} is located here. Removing {piece_to_return}")
 
     def move(self, xy_coord, piece): # This is one way to do it, but I could also use the above in get + remove to first check if a move if valid
@@ -119,7 +119,6 @@ class Board():
             print(check[1])
         if check[0] is False:
             print(check[1])
-        self.visual = self._generate_visual()
 
     def get_state(self):  # Gives me the dictionary in all its glory
         return self.xy_coord
@@ -127,13 +126,12 @@ class Board():
     def clear_board(self):
         for all_keys in self.xy_coord:
             self.xy_coord[all_keys] = None
-        self.visual = self._generate_visual()
 
 
 class Checkers_Board(Board):
     def __init__(self):
         super().__init__((8, 8))
-        # List of red/black objects
+        # List of white/black objects
         self.white_pieces = self.create_pieces("white")
         self.black_pieces = self.create_pieces("black")
     
@@ -163,40 +161,39 @@ class Checkers_Board(Board):
     
     def is_regular_move_valid(self, piece):
         check_move = piece.check_valid_move()
-        # print(check_move)
         if piece.team == "white":  # White starts Top and must move Down
             sw = piece.moves["move_sw"]  # SW
             se = piece.moves["move_se"]  # SE
             white_moves = {
-                "sw_move": False,
-                "se_move": False
+                "move_sw": False,
+                "move_se": False
             }
             if sw is not None:
                 sw_space = self.get_from_location(sw)
                 if sw_space is None:
-                    white_moves["sw_move"] = True
+                    white_moves["move_sw"] = True
             if se is not None:
                 se_space = self.get_from_location(se)
                 if se_space is None:
-                    white_moves["se_move"] = True
+                    white_moves["move_se"] = True
             return white_moves
         
         if piece.team == "black":  # Black starts Bottom and must move Up
             nw = piece.moves["move_nw"]  # NW
             ne = piece.moves["move_ne"]  # NE
             black_moves = {
-                "nw_move": False,
-                "ne_move": False
+                "move_nw": False,
+                "move_ne": False
             }
             if nw is not None:
                 nw_space = self.get_from_location(nw)
                 if nw_space is None:
-                    black_moves["nw_move"] = True
+                    black_moves["move_nw"] = True
                     
             if ne is not None:
                 ne_space = self.get_from_location(ne)
                 if ne_space is None:
-                    black_moves["ne_move"] = True
+                    black_moves["move_ne"] = True
                     
             return black_moves
 

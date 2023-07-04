@@ -3,34 +3,30 @@ from board.board import *
 
 # Testing
 
-#board_setup()
+# Generate Board & Pieces
 checkers_board = Checkers_Board()
 checkers_board.board_setup()
-# print(checkers_board.visual)
-board_state = checkers_board.get_state()
+print(checkers_board.visual)
 
-# print(board_state)
-# # check_move()
-# print(checkers_board.white_pieces[8].name, checkers_board.white_pieces[8].xy_coord, checkers_board.white_pieces[8].team)
-# print(checkers_board.white_pieces[8].check_move())
-# print(checkers_board.white_pieces[9].name, checkers_board.white_pieces[9].xy_coord, checkers_board.white_pieces[9].team)
-# print(checkers_board.white_pieces[9].check_move())
 
-# print("-" * 20)
+def cycle_through_pieces(list_of_pieces):
+    list_length = len(list_of_pieces)
+    index = 0
+    selected_piece = None
+    while selected_piece is None:
+        current_piece = list_of_pieces[index]
+        print(f"Current piece: {current_piece.name}")
+        user_input = input("Enter 'q' for previous, 'e' for next or 's' to select: ")
+        if user_input == "q":
+            index = (index + 1) % list_length  # Cycle to the next index
+            continue
+        if user_input == "e":
+            index = (index - 1) % list_length  # Cycle to the next index
+            continue
+        elif user_input == "s":
+            selected_piece = current_piece
+    return selected_piece
 
-# print(checkers_board.black_pieces[8].name,
-#       checkers_board.black_pieces[8].xy_coord,
-#       checkers_board.black_pieces[8].team)
-# print(checkers_board.black_pieces[8].check_valid_move())
-# print(checkers_board.black_pieces[9].name, checkers_board.black_pieces[9].xy_coord, checkers_board.black_pieces[9].team)
-# print(checkers_board.black_pieces[9].check_valid_move())
-
-# # regular_move()
-# print(checkers_board.is_regular_move_valid((checkers_board.black_pieces[8])))
-# print(checkers_board.is_regular_move_valid((checkers_board.white_pieces[8])))
-valid_white_moves = checkers_board.is_regular_move_valid((checkers_board.white_pieces[8]))
-
-valid_black_moves = checkers_board.is_regular_move_valid((checkers_board.black_pieces[8]))
 
 def show_valid_moves(valid_moves):
     show_choices = []
@@ -39,15 +35,37 @@ def show_valid_moves(valid_moves):
             show_choices.append(name)
     return show_choices
 
-def make_valid_move(valid_moves):
+
+def make_valid_move(valid_moves, piece):
     player_options = show_valid_moves(valid_moves)
     print(f"Here are your valid moves: {player_options}")
     user_input = input("Make a choice: ")
     if user_input in valid_moves:
         print(f"You choice was to move to {user_input}")
-        # Put move piece logic here
+        selected_move = piece.moves[user_input]
+        checkers_board.move(selected_move, piece)  # Move piece to (x, y) location
+        checkers_board.remove_from_location(piece.xy_coord)  # Remove piece from board at its previous (x, y)
+        piece.xy_coord = selected_move  # Update (x, y) of piece.xy_coord attr
+        piece.check_valid_move()  # Update piece.moves to reflect new possible moves
+
+        print(checkers_board._generate_visual())
     else:
         print("Invalid Move. Try Again")
-        make_valid_move(valid_moves)
+        make_valid_move(valid_moves, piece)
 
-user_move_input = make_valid_move(valid_black_moves)
+def player_turn():
+    selected_piece = cycle_through_pieces(checkers_board.white_pieces)
+    print(selected_piece.name, selected_piece.xy_coord)
+    can_this_move = checkers_board.is_regular_move_valid(selected_piece)
+    if all(value is False for value in can_this_move.values()):  # Check to see if select piece is capable of making a valid move
+        print("This piece has no valid moves. Choose another piece")
+        player_turn()
+    else:
+        if selected_piece.team == "white":
+            valid_white_moves = checkers_board.is_regular_move_valid(selected_piece)
+            make_valid_move(valid_white_moves, selected_piece)
+        if selected_piece.team == "black":
+            valid_black_moves = checkers_board.is_regular_move_valid(selected_piece)
+            make_valid_move(valid_black_moves, selected_piece)
+
+test1 = player_turn()
