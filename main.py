@@ -15,7 +15,10 @@ def cycle_through_pieces(list_of_pieces):
     selected_piece = None
     while selected_piece is None:
         current_piece = list_of_pieces[index]
-        print(f"Current piece: {current_piece.name}")
+        print(f"Current piece: {current_piece.name} at position {current_piece.xy_coord}")
+        flashing_position = current_piece.xy_coord
+        visual = checkers_board._generate_visual(flashing_position)
+        print(visual)
         user_input = input("Enter 'q' for previous, 'e' for next or 's' to select: ")
         if user_input == "q":
             index = (index + 1) % list_length  # Cycle to the next index
@@ -47,8 +50,6 @@ def make_valid_move(valid_moves, piece):
         checkers_board.remove_from_location(piece.xy_coord)  # Remove piece from board at its previous (x, y)
         piece.xy_coord = selected_move  # Update (x, y) of piece.xy_coord attr
         piece.check_valid_move()  # Update piece.moves to reflect new possible moves
-
-        print(checkers_board._generate_visual())
     else:
         print("Invalid Move. Try Again")
         make_valid_move(valid_moves, piece)

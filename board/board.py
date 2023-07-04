@@ -51,8 +51,17 @@ class Board():
                 xy_coord = (x_coord, y_coord)
                 board_coor[xy_coord] = None
         return board_coor
-    
-    def _generate_visual(self):  # Generate visual representation with coordinates on the outside
+
+    def _generate_position_visual(self, xy_coord, flashing=False):
+        if self.xy_coord[xy_coord] is None:
+            return "[ ]"
+        else:
+            if flashing:
+                return "[\033[37;5m*\033[0m]"
+            else:
+                return "[*]"
+
+    def _generate_visual(self, flashing_position=None):  # Generate visual representation with coordinates on the outside
         """
         Currently this exists as a visual debugging tool 
         during game logic testing.
@@ -70,31 +79,30 @@ class Board():
         that only executes when we ask it to actually function as a visual
         game within the terminal without being tied to the underlying game
 
-        We can eventually tie this to cycle_through_pieces() as well
-
         var = "*"
         var_blink = (f"\033[37;5m{var}\033[0m")
         bracket_left = "["
         bracket_right = "]"
         print(bracket_left+var_blink+bracket_right)
         """
-        
+
         visual_object = ""
-        # Generate the rows with y-coordinates and board content
         for y in range(self.y_coord, 0, -1):
-            visual_object += f" {y} "  # Left-aligned y-coordinate
+            visual_object += f" {y} "
             for x in range(1, self.x_coord + 1):
                 xy_coord = (x, y)
-                if self.xy_coord[xy_coord] is None:
-                    visual_object += "[ ]"
+                if xy_coord == flashing_position:
+                    flashing = True
                 else:
-                    visual_object += "[*]"
+                    flashing = False
+                visual_object += self._generate_position_visual(xy_coord, flashing)
             visual_object += "\n"
-        # Generate the bottom row with x-coordinates
         visual_object += "   "
         for x in range(1, self.x_coord + 1):
             visual_object += f" {x} "
+        # print("\033[H\033[J") # Visual Trick to make it look cleaner.
         return visual_object
+
 
     def _place_at_location(self, xy_coord, piece):
         if self.xy_coord[xy_coord] is None:  # If space is empty, place piece and return True
