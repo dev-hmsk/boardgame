@@ -13,21 +13,27 @@ def cycle_through_pieces(list_of_pieces):
     list_length = len(list_of_pieces)
     index = 0
     selected_piece = None
+
     while selected_piece is None:
         current_piece = list_of_pieces[index]
         print(f"Current piece: {current_piece.name} at position {current_piece.xy_coord}")
         flashing_position = current_piece.xy_coord
         visual = checkers_board._generate_visual(flashing_position)
         print(visual)
+        
         user_input = input("Enter 'q' for previous, 'e' for next or 's' to select: ")
+        
         if user_input == "q":
-            index = (index + 1) % list_length  # Cycle to the next index
+            index = (index + 1) % list_length
             continue
-        if user_input == "e":
-            index = (index - 1) % list_length  # Cycle to the next index
+        elif user_input == "e":
+            index = (index - 1) % list_length
             continue
         elif user_input == "s":
             selected_piece = current_piece
+        else:
+            print("Invalid Input. Try Again")
+
     return selected_piece
 
 
@@ -65,7 +71,20 @@ def player_turn(team, name):
        
     print(selected_piece.name, selected_piece.xy_coord)
     can_this_move = checkers_board.is_regular_move_valid(selected_piece)
-    
+    print("Debug for capture")
+    print(can_this_move)
+    if any(value is False for value in can_this_move.values()): # see if there is a capturable piece
+        for move in can_this_move:
+            if can_this_move[move] is False:
+                check_space = selected_piece.moves[move]
+                print("x y coord")
+                print(check_space)
+                if check_space is not None:
+                    opp_piece = checkers_board.get_from_location(check_space)
+                    if opp_piece.team != team: # If this executes its capture time
+                        print(f'You are on {team} team. and {opp_piece.name} is on {opp_piece.team}')
+                        checkers_board.can_capture(opp_piece)
+    # Otherwise all spaces are empty or without capturable pieces
     if all(value is False for value in can_this_move.values()):  # Check to see if select piece is capable of making a valid move
         print("This piece has no valid moves. Choose another piece")
         player_turn(team, name)

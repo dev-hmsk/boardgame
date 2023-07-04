@@ -100,9 +100,8 @@ class Board():
         visual_object += "   "
         for x in range(1, self.x_coord + 1):
             visual_object += f" {x} "
-        # print("\033[H\033[J") # Visual Trick to make it look cleaner.
+        print("\033[H\033[J") # Visual Trick to make it look cleaner.
         return visual_object
-
 
     def _place_at_location(self, xy_coord, piece):
         if self.xy_coord[xy_coord] is None:  # If space is empty, place piece and return True
@@ -111,16 +110,20 @@ class Board():
         else:  # If space is full, return False
             return False, (f"Invalid move, {self.xy_coord[xy_coord]} is already located at {xy_coord}")
 
-    def get_from_location(self, xy_coord):  # Return whatever is at the given x,y coor
+    def get_from_location(self, xy_coord):  # Return whatever is at the given x,y coord
         return self.xy_coord[xy_coord]
 
-    def remove_from_location(self, xy_coord):  # Remove piece at location
-        if self.xy_coord[xy_coord] is None:
-            return False, ("Nothing is here")
-        if self.xy_coord[xy_coord] is not None:  # Something is here, return True and the piece at this location and set x,y to None
-            piece_to_return = self.xy_coord[xy_coord]
-            self.xy_coord[xy_coord] = None
-            return True, piece_to_return, (f"{piece_to_return} is located here. Removing {piece_to_return}")
+    def remove_from_location(self, xy_coord, capture=False):  # Remove piece at location
+        if capture:
+            # Add capture and .pop
+            pass
+        else:
+            if self.xy_coord[xy_coord] is None:
+                return False, ("Nothing is here")
+            if self.xy_coord[xy_coord] is not None:  # Something is here, return True and the piece at this location and set x,y to None
+                piece_to_return = self.xy_coord[xy_coord]
+                self.xy_coord[xy_coord] = None
+                return True, piece_to_return, (f"{piece_to_return} is located here. Removing {piece_to_return}")
 
     def move(self, xy_coord, piece): # This is one way to do it, but I could also use the above in get + remove to first check if a move if valid
         check = self._place_at_location(xy_coord, piece)
@@ -203,3 +206,10 @@ class Checkers_Board(Board):
                 if ne_space is None:
                     black_moves["move_ne"] = True
             return black_moves
+    # def is_enemy_present():
+
+    # def can_capture(opp_piece):
+    #     opposite_dictionary = {
+            
+    #     }
+    #     # i need to check direction relative to piece
