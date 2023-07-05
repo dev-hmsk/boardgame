@@ -22,7 +22,6 @@ class Checkers_Game_Piece(Game_Piece):
     def check_valid_move(self):
         self.moves.update({key: None for key in self.moves})  # Reset possible moves before check
         xy_coord_copy = self.xy_coord
-
         if (xy_coord_copy[0] - 1 >= 1) and (xy_coord_copy[1] + 1 <= 8):  # Check NW
             self.moves["move_nw"] = xy_coord_copy[0] - 1, xy_coord_copy[1] + 1
         if (xy_coord_copy[0] + 1 <= 8) and (xy_coord_copy[1] + 1 <= 8):  # Check NE
@@ -31,7 +30,6 @@ class Checkers_Game_Piece(Game_Piece):
             self.moves["move_sw"] = xy_coord_copy[0] - 1, xy_coord_copy[1] - 1
         if (xy_coord_copy[0] + 1 <= 8) and (xy_coord_copy[1] - 1 <= 8):  # Check SE
             self.moves["move_se"] = xy_coord_copy[0] + 1, xy_coord_copy[1] - 1
-        
         return self.moves
 
 
@@ -43,11 +41,11 @@ class Board():
         self.x_coord = dimension[0]
         self.y_coord = dimension[1]
         self.xy_coord = self._generate_dimension()
-        self.visual = self._generate_visual()
         self.board_space_color = self._generate_board_space_color(self.xy_coord)
         self.black_spaces = self.board_space_color[0]
         self.white_spaces = self.board_space_color[1]
-        
+        self.visual = self._generate_visual()
+
     def _generate_dimension(self):
         board_coor = {}
         for x_coord in range(1, self.x_coord + 1):
@@ -80,21 +78,32 @@ class Board():
         return sorted_black_list, sorted_white_list
 
     def _generate_position_visual(self, xy_coord, flashing=False):
-        if self.xy_coord[xy_coord] is None:
-            return "[ ]"
+        if self.xy_coord[xy_coord] is None and (xy_coord in self.black_spaces):
+            # If empty space on black tile
+            background_color = "\033[30m" # Black
+            reset_color = "\033[0m"
+            visual_check = f"{background_color}   {reset_color}"
+            return visual_check
+        elif self.xy_coord[xy_coord] is None and (xy_coord in self.white_spaces):
+            # If empty space on white tile
+            background_color = "\033[100m" # Dark Grey
+            #background_color = "\033[47m" # White 
+            reset_color = "\033[0m"
+            visual_check = f"{background_color}   {reset_color}"
+            return visual_check
         else:
             piece = self.xy_coord[xy_coord]
-            board_location = piece.xy_coord
+            # board_location = piece.xy_coord
             if piece.team == "white":
                 if flashing:
-                    return "[\033[37;5m*\033[0m]"
+                    return "[\033[37;5mo\033[0m]"
                 else:
-                    return "[*]"
+                    return " o "
             if piece.team == "black":
                 if flashing:
-                    return "[\033[5;90m*\033[0m]"
+                    return "\033[5;90m[o]\033[0m"
                 else:
-                    return "[\033[90m*\033[0m]"
+                    return " \033[90mo\033[0m "
 
     def _generate_visual(self, flashing_position=None):  # Generate visual representation with coordinates on the outside
         visual_object = ""

@@ -7,15 +7,6 @@ from board.board import *
 
 # Testing
 
-red_fg = "\033[31m"
-dark_gray_bg = "\033[100m"
-reset_color = "\033[0m"
-white_bg = "\033[37m"
-visual_check = f"[{dark_gray_bg}{white_bg}*{reset_color}]"
-print(visual_check)
-
-
-
 def cycle_through_pieces(list_of_pieces):
     list_length = len(list_of_pieces)
     index = 0
