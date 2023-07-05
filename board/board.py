@@ -20,6 +20,7 @@ class Checkers_Game_Piece(Game_Piece):
         }
 
     def check_valid_move(self):
+        self.moves.update({key: None for key in self.moves})  # Reset possible moves before check
         xy_coord_copy = self.xy_coord
 
         if (xy_coord_copy[0] - 1 >= 1) and (xy_coord_copy[1] + 1 <= 8):  # Check NW
@@ -219,17 +220,24 @@ class Checkers_Board(Board):
                 if ne_space is None:
                     black_moves["move_ne"] = True
             return black_moves
-    # def is_enemy_present():
 
     def can_capture(self, starting_loc, opp_piece):
         # We add the opposite direction
         # So we if start from the sw of the opp piece we check the ne
+        print(f"can_capture starting_loc arg debug {starting_loc}")
         space_behind = opp_piece.moves[starting_loc]
-        check_space = self.get_from_location(space_behind)
-        if check_space is None:
-            print(f"Space at {space_behind} behind {opp_piece} is Empty")
-            print("You must capture this piece")
-        return True
+        print(f"can_capture() space_behind debug {space_behind}")
+        if space_behind is not None:
+            check_space = self.get_from_location(space_behind)
+            print(f"can_capture() check_space debug {check_space}")
+            if check_space is None:
+                print(f"Space at {space_behind} behind {opp_piece} is Empty")
+                print("You must capture this piece")
+                return True
+            else:
+                return False
+        else:
+            return False
 
     def remove_piece(self, xy_coord):
         piece_to_remove = self.xy_coord[xy_coord]
