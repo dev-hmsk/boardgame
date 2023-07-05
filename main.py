@@ -1,13 +1,19 @@
 from board.board import *
 
 
+
+
+
+
 # Testing
 
-# Generate Board & Pieces
-checkers_board = Checkers_Board()
-checkers_board.board_setup()
-print(checkers_board.visual)
-# print(checkers_board.get_state())
+red_fg = "\033[31m"
+dark_gray_bg = "\033[100m"
+reset_color = "\033[0m"
+white_bg = "\033[37m"
+visual_check = f"[{dark_gray_bg}{white_bg}*{reset_color}]"
+print(visual_check)
+
 
 
 def cycle_through_pieces(list_of_pieces):
@@ -107,6 +113,7 @@ def check_capturable_moves(selected_piece, team):
                     check_capture_condition = checkers_board.can_capture(move, opp_piece)
                     if check_capture_condition is True:
                         capturable_moves[move] = opp_piece.moves[move]
+
     return capturable_moves
 
 
@@ -118,9 +125,9 @@ def process_piece_selection(team, pieces):
         capture_piece(capturable_moves, selected_piece)
     else:
         valid_moves = checkers_board.is_regular_move_valid(selected_piece)
-        if all(value is False for value in valid_moves.values()):
+        if all(value is False for value in valid_moves.values()):  # Recusively restart turn
             print("This piece has no valid moves. Select another piece")
-            process_piece_selection(team, pieces)  # Recusively restart turn
+            process_piece_selection(team, pieces)
         else:
             make_valid_move(valid_moves, selected_piece)
 
@@ -141,6 +148,14 @@ def board_force_capture():
     a piece if available and not give him a choice to select another
     '''
 
+
+
+
+# Generate Board & Pieces
+checkers_board = Checkers_Board()
+checkers_board.board_setup()
+# print(checkers_board.visual)
+# print(checkers_board.get_state())
 
 # Turn Order
 is_game_active = True

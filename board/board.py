@@ -44,7 +44,10 @@ class Board():
         self.y_coord = dimension[1]
         self.xy_coord = self._generate_dimension()
         self.visual = self._generate_visual()
-
+        self.board_space_color = self._generate_board_space_color(self.xy_coord)
+        self.black_spaces = self.board_space_color[0]
+        self.white_spaces = self.board_space_color[1]
+        
     def _generate_dimension(self):
         board_coor = {}
         for x_coord in range(1, self.x_coord + 1):
@@ -53,40 +56,47 @@ class Board():
                 board_coor[xy_coord] = None
         return board_coor
 
+    def _generate_board_space_color(self, xy_coord):
+        # (1,1) or bottom-most left is a black square
+        black_spaces = []
+        white_spaces = []
+        for location in xy_coord:
+            x_coord = location[0]
+            y_coord = location[1]
+            # Black Spaces aka legal piece spaces
+            if x_coord % 2 == 0 and y_coord % 2 == 0:
+                black_spaces.append(location)
+            if x_coord % 2 != 0 and y_coord % 2 != 0:
+                black_spaces.append(location)
+            # White Spaces aka empty spaces
+            if x_coord % 2 != 0 and y_coord % 2 == 0:
+                white_spaces.append(location)
+            if x_coord % 2 == 0 and y_coord % 2 != 0:
+                white_spaces.append(location)
+
+        sorted_black_list = sorted(black_spaces, key=lambda x: x[0])
+        sorted_white_list = sorted(white_spaces, key=lambda x: x[0])
+        # Return black and then white
+        return sorted_black_list, sorted_white_list
+
     def _generate_position_visual(self, xy_coord, flashing=False):
         if self.xy_coord[xy_coord] is None:
             return "[ ]"
         else:
-            if flashing:
-                return "[\033[37;5m*\033[0m]"
-            else:
-                return "[*]"
+            piece = self.xy_coord[xy_coord]
+            board_location = piece.xy_coord
+            if piece.team == "white":
+                if flashing:
+                    return "[\033[37;5m*\033[0m]"
+                else:
+                    return "[*]"
+            if piece.team == "black":
+                if flashing:
+                    return "[\033[5;90m*\033[0m]"
+                else:
+                    return "[\033[90m*\033[0m]"
 
     def _generate_visual(self, flashing_position=None):  # Generate visual representation with coordinates on the outside
-        """
-        Currently this exists as a visual debugging tool 
-        during game logic testing.
-        
-        To be done at end:
-
-        The below ANSII prints {var} as blinking text in the bash terminal.
-        Keep for later use in _generate_visual static method.
-
-        After all game logic is created and functional we should abstract
-        the GUI visual away from Board(). We could possibly tie the visual
-        updates to the Board.get_state() function to then trigger a "clear" 
-        cmd in the bash terminal and re-print the visual object to simulate
-        a refreshing/updating board. This could allow us to have a Visual()
-        that only executes when we ask it to actually function as a visual
-        game within the terminal without being tied to the underlying game
-
-        var = "*"
-        var_blink = (f"\033[37;5m{var}\033[0m")
-        bracket_left = "["
-        bracket_right = "]"
-        print(bracket_left+var_blink+bracket_right)
-        """
-
         visual_object = ""
         for y in range(self.y_coord, 0, -1):
             visual_object += f" {y} "
