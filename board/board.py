@@ -38,13 +38,13 @@ class Board():
 
     def __init__(self, dimension):
         self.dimension = dimension
-        self.x_coord = dimension[0]
+        self.x_coord = dimension[0] 
         self.y_coord = dimension[1]
-        self.xy_coord = self._generate_dimension()
+        self.xy_coord = self._generate_dimension() # This is a dict that contains all (x,y) locations and Game_Piece objs on board
         self.board_space_color = self._generate_board_space_color(self.xy_coord)
         self.black_spaces = self.board_space_color[0]
         self.white_spaces = self.board_space_color[1]
-        self.visual = self._generate_visual()
+        self.visual = self._generate_visual() # Updates terminal with visual
 
     def _generate_dimension(self):
         board_coor = {}
@@ -74,23 +74,20 @@ class Board():
 
         sorted_black_list = sorted(black_spaces, key=lambda x: x[0])
         sorted_white_list = sorted(white_spaces, key=lambda x: x[0])
-        # Return black and then white
-        return sorted_black_list, sorted_white_list
+        return sorted_black_list, sorted_white_list  # Return black and then white
 
     def _generate_position_visual(self, xy_coord, flashing=False):
-        if self.xy_coord[xy_coord] is None and (xy_coord in self.black_spaces):
-            # If empty space on black tile
-            background_color = "\033[30m" # Black
-            reset_color = "\033[0m"
-            visual_check = f"{background_color}   {reset_color}"
-            return visual_check
-        elif self.xy_coord[xy_coord] is None and (xy_coord in self.white_spaces):
-            # If empty space on white tile
-            background_color = "\033[100m" # Dark Grey
-            #background_color = "\033[47m" # White 
-            reset_color = "\033[0m"
-            visual_check = f"{background_color}   {reset_color}"
-            return visual_check
+        if self.xy_coord[xy_coord] is None and (xy_coord in self.black_spaces):  # If empty space on black tile
+            background_color = "\033[30m"  # Black option
+            reset_color = "\033[0m"  # Neutral terminal color
+            visual_space = f"{background_color}   {reset_color}"
+            return visual_space
+        elif self.xy_coord[xy_coord] is None and (xy_coord in self.white_spaces):  # If empty space on white tile
+            background_color = "\033[100m"  # Dark Grey option
+            # background_color = "\033[47m" # White option
+            reset_color = "\033[0m"  # Neutral terminal color
+            visual_space = f"{background_color}   {reset_color}"
+            return visual_space
         else:
             piece = self.xy_coord[xy_coord]
             # board_location = piece.xy_coord
@@ -105,7 +102,7 @@ class Board():
                 else:
                     return " \033[90mo\033[0m "
 
-    def _generate_visual(self, flashing_position=None):  # Generate visual representation with coordinates on the outside
+    def _generate_visual(self, flashing_position=None):  # Generate visual representation with coordinates on the leftside and bottom
         visual_object = ""
         for y in range(self.y_coord, 0, -1):
             visual_object += f" {y} "
@@ -120,7 +117,7 @@ class Board():
         visual_object += "   "
         for x in range(1, self.x_coord + 1):
             visual_object += f" {x} "
-        # print("\033[H\033[J") # Visual Trick to make it look cleaner.
+        print("\033[H\033[J") # Visual trick to make terminal look cleaner. Can be safely commented out to debug
         return visual_object
 
     def _place_at_location(self, xy_coord, piece):
@@ -141,14 +138,18 @@ class Board():
             self.xy_coord[xy_coord] = None
             return True, piece_to_return, (f"{piece_to_return} is located here. Removing {piece_to_return}")
 
-    def move(self, xy_coord, piece): # This is one way to do it, but I could also use the above in get + remove to first check if a move if valid
+    def move(self, xy_coord, piece): 
+        """
+         This is one way to do it, but I could also use the 
+         above get + remove to first check if a move if valid
+        """
         check = self._place_at_location(xy_coord, piece)
         if check[0] is True:
             print(check[1])
         if check[0] is False:
             print(check[1])
 
-    def get_state(self):  # Gives me the dictionary in all its glory
+    def get_state(self):
         return self.xy_coord
 
     def clear_board(self):
@@ -167,14 +168,12 @@ class Checkers_Board(Board):
         white_start_coord_unsort = []
         black_start_coord_unsort = []
         for location in self.xy_coord:
-            # Top of Board. White Pieces
-            if location[1] >= 6:
+            if location[1] >= 6:  # Top of Board. White Pieces
                 if location[0] % 2 == 1 and location[1] % 2 == 1:
                     white_start_coord_unsort.append(location)
                 if location[0] % 2 == 0 and location[1] % 2 == 0:
                     white_start_coord_unsort.append(location)
-            # Bottom of Board. Black Pieces
-            if location[1] <= 3:
+            if location[1] <= 3:  # Bottom of Board. Black Pieces
                 if location[0] % 2 == 1 and location[1] % 2 == 1:
                     black_start_coord_unsort.append(location)
                 if location[0] % 2 == 0 and location[1] % 2 == 0:
@@ -182,20 +181,18 @@ class Checkers_Board(Board):
         white_start_coord = sorted(white_start_coord_unsort, key=lambda y: y[1])
         black_start_coord = sorted(black_start_coord_unsort, key=lambda y: y[1], reverse=True)
         
-        # White Piece Placement
-        for i in range(0, len(white_start_coord)):
+        for i in range(0, len(white_start_coord)):  # White Piece Placement
             white_xy_coord = (white_start_coord[i])
             white_piece = self.white_pieces[i]
             self._place_at_location(white_xy_coord, white_piece)
             self.white_pieces[i].update_position(white_xy_coord)
-        # Black Piece Placement
-        for i in range(0, len(black_start_coord)):
+
+        for i in range(0, len(black_start_coord)):  # Black Piece Placement
             black_xy_coord = (black_start_coord[i])
             black_piece = self.black_pieces[i]
             self._place_at_location(black_xy_coord, black_piece)
             self.black_pieces[i].update_position(black_xy_coord)
-        # Update Visual
-        self.visual = self._generate_visual()
+        self.visual = self._generate_visual()  # Update visual board in terminal
 
     def create_pieces(self, name):
         piece_list = []
@@ -204,8 +201,8 @@ class Checkers_Board(Board):
             piece_list.append(obj)
         return piece_list
 
-    def is_regular_move_valid(self, piece):
-        check_move = piece.check_valid_move()
+    def is_regular_move_valid(self, piece):  # Valid Non-King moves
+        piece.check_valid_move()  # Update piece.moves
         if piece.team == "white":  # White starts Top and must move Down
             sw = piece.moves["move_sw"]  # SW
             se = piece.moves["move_se"]  # SE
