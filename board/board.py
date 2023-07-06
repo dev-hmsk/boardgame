@@ -178,7 +178,10 @@ class Board():
             return visual_space
         else:
             piece = self.xy_coord[xy_coord]
-            visual_piece = "o"
+            if piece.is_king is True:
+                visual_piece = "K"
+            if piece.is_king is False:
+                visual_piece = "o"
             if piece.team == "white":
                 if flashing:
                     return f"[\033[37;5m{visual_piece}\033[0m]"
