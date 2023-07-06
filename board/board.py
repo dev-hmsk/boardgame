@@ -155,7 +155,7 @@ class Board():
         board_display += "   "
         for x in range(1, self.x_coord + 1):
             board_display += f" {x} "
-        print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
+        # print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
         return board_display
 
     def _generate_position_visual(self, xy_coord, flashing=False):
@@ -273,8 +273,8 @@ class Checkers_Board(Board):
     def __init__(self):
         super().__init__((8, 8))
         # List of white/black objects
-        self.white_pieces = self._create_pieces("white")
-        self.black_pieces = self._create_pieces("black")
+        self.white_pieces = self._create_pieces("white")  # List
+        self.black_pieces = self._create_pieces("black")  # List
         self.all_king_rows = self._create_king_row()
         self.white_side_king_row = self.all_king_rows[0]  # This is (x, 8) row list
         self.black_side_king_row = self.all_king_rows[1]  # This is (x, 1) row list

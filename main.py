@@ -67,9 +67,16 @@ def process_move(valid_moves, piece, capture=False):
         # print(f"debug of piece.xy_coord {piece.xy_coord}")
         piece.check_valid_move()  # Update piece.moves to reflect new possible moves
         checkers_board.check_king_me(piece)  # Update piece.is_king if possible
+        is_game_over() # Check for Victory Condition
         # print(f"Debug of updated piece.moves {piece.moves}") 
 
-    elif user_input in valid_moves:  # If you can't capture, move regularly
+        """
+        currently a bug where capture flag is incorrectly made false when it should be 
+        true. this causes the below elif statement to trigger and the piece during what 
+        should be a capture move instead normally moves into the space, but it is occupied by the opp_piece
+        """
+
+    elif user_input in valid_moves and (capture is False):  # If you can't capture, move regularly
         print(f"You choice was to move to {user_input}")
         selected_move = piece.moves[user_input]
         checkers_board.move(selected_move, piece)  # Move piece to (x, y) location
@@ -129,7 +136,7 @@ def board_force_capture(team, all_team_pieces):
     # print("Debug board_force_capture() block")
     force_captures_list = []
     
-    for piece in all_team_pieces: # iterate through all possible pieces and potential captures
+    for piece in all_team_pieces: # Iterate through all possible pieces and potential captures
         capturable_move = check_capturable_moves(piece, team)
         if capturable_move:
             force_captures_list.append(piece)
@@ -148,6 +155,7 @@ def process_piece_selection(team, pieces, recursion=False):
         visual_display(selected_piece)  # Visual Board in Terminal
     else:
         selected_piece = select_piece(pieces)
+
     capturable_moves = check_capturable_moves(selected_piece, team)
     if capturable_moves:
         # print(f"Debug moves before capture {selected_piece.moves}")
@@ -195,6 +203,13 @@ def cycle_through_pieces(list_of_pieces): # Allow player to cycle through all av
             print("Invalid Input. Try Again")
 
     return selected_piece
+
+
+def is_game_over():
+    if (len(checkers_board.white_pieces) == 0) or (len(checkers_board.black_pieces) == 0):
+        print("Game Over")
+        global is_game_active
+        is_game_active= False
 
 """
 Main() for Checkers Game
