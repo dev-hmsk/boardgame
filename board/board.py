@@ -90,17 +90,18 @@ class Board():
             return visual_space
         else:
             piece = self.xy_coord[xy_coord]
+            visual_piece = "o"
             # board_location = piece.xy_coord
             if piece.team == "white":
                 if flashing:
-                    return "[\033[37;5mo\033[0m]"
+                    return f"[\033[37;5m{visual_piece}\033[0m]"
                 else:
-                    return " o "
+                    return f" {visual_piece} "
             if piece.team == "black":
                 if flashing:
-                    return "\033[5;90m[o]\033[0m"
+                    return f"[\033[5;90m{visual_piece}\033[0m]"
                 else:
-                    return " \033[90mo\033[0m "
+                    return f" \033[90m{visual_piece}\033[0m "
 
     def _generate_visual(self, flashing_position=None):  # Generate visual representation with coordinates on the leftside and bottom
         visual_object = ""
@@ -117,7 +118,7 @@ class Board():
         visual_object += "   "
         for x in range(1, self.x_coord + 1):
             visual_object += f" {x} "
-        print("\033[H\033[J") # Visual trick to make terminal look cleaner. Can be safely commented out to debug
+        print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
         return visual_object
 
     def _place_at_location(self, xy_coord, piece):

@@ -8,13 +8,17 @@ def cycle_through_pieces(list_of_pieces): # Allow player to cycle through all av
 
     while selected_piece is None:
         current_piece = list_of_pieces[index]
-        print(f"Current piece: {current_piece.name} at position {current_piece.xy_coord}")
+
+        # Visual Block
         flashing_position = current_piece.xy_coord
         visual = checkers_board._generate_visual(flashing_position)
+        piece_number = current_piece.name.split("_")[-1]
+        print(f"      {current_piece.team.capitalize()} Players Turn")
+        print("   " + "-" * 24)
         print(visual)
-        
+        print(f"{current_piece.team.capitalize()} Piece {piece_number} at {current_piece.xy_coord}")
         user_input = input("Enter 'q' for previous, 'e' for next or 's' to select: ")
-        
+
         if user_input == "q":
             index = (index - 1) % list_length
             continue
