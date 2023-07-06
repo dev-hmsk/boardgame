@@ -49,7 +49,7 @@ class Board():
 
     def __init__(self, dimension):
         self.dimension = dimension
-        self.x_coord = dimension[0] 
+        self.x_coord = dimension[0]
         self.y_coord = dimension[1]
         self.xy_coord = self._generate_dimension() # This is a dict that contains all (x,y) locations and Game_Piece objs on board
         self.board_space_color = self._generate_board_space_color(self.xy_coord)
@@ -232,7 +232,10 @@ class Checkers_Board(Board):
         # List of white/black objects
         self.white_pieces = self._create_pieces("white")
         self.black_pieces = self._create_pieces("black")
-
+        self.all_king_rows = self._make_king_row()
+        self.white_king_row = self.all_king_rows[0]  # This is (x, 8) row list
+        self.black_king_row = self.all_king_rows[1]  # This is (x, 1) row list
+    
     def board_setup(self):  # Place all Checker Pieces
         white_start_coord_unsort = []
         black_start_coord_unsort = []
@@ -269,6 +272,15 @@ class Checkers_Board(Board):
             obj = Checkers_Game_Piece(name, i)
             piece_list.append(obj)
         return piece_list
+    
+    def _make_king_row(self):
+        white_king_row = []
+        black_king_row = []
+        for x_coord in range(1,9):
+            white_king_row.append(x_coord, 8)
+            black_king_row.append(x_coord, 1)
+        
+        return white_king_row, black_king_row
 
     def is_regular_move_valid(self, piece):  # Valid Non-King moves
         piece.check_valid_move()  # Update piece.moves

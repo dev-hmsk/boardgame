@@ -8,6 +8,11 @@ def board_force_capture(all_team_pieces):
     a piece if available and not give him a choice to 
     select a non-capturing piece
 
+    option1
+    We might be able to use get_state() since it 
+    returns a dict of whole board
+
+    option2
     We could iterate through Checkers_Board.white/black_pieces
     which is a list of piece obj. If piece obj has a valid capturable 
     move, skip piece selection and make it the only selected piece.
@@ -22,7 +27,7 @@ def king_me(regular_piece):
     pass
     """
     Option 1 (Better Idea)
-    When a piece reaches (x,8) or (1,x) we must add the king tag to the piece
+    When a piece reaches (x,8) or (x,1) we must add the king tag to the piece
     This allows king pieces to access new functionality in things like
     check_valid_move or capture_piece to move/capture in all directions
     Pros:
@@ -55,30 +60,9 @@ def visual_display(current_piece):
     print(visual)
     print(f"{current_piece.team.capitalize()} Piece {piece_number} at {current_piece.xy_coord}")
 
-
-def cycle_through_pieces(list_of_pieces): # Allow player to cycle through all available game_pieces
-    list_length = len(list_of_pieces)
-    index = 0
-    selected_piece = None
-
-    while selected_piece is None:
-        current_piece = list_of_pieces[index]
-        visual_display(current_piece)   # Visual Board in Terminal
-        user_input = input("Enter 'q' for previous, 'e' for next or 's' to select: ")
-
-        if user_input == "q":
-            index = (index - 1) % list_length
-            continue
-        elif user_input == "e":
-            index = (index + 1) % list_length
-            continue
-        elif user_input == "s":
-            selected_piece = current_piece
-        else:
-            print("Invalid Input. Try Again")
-
-    return selected_piece
-
+"""
+Piece Logic
+"""
 
 def show_valid_moves(valid_moves): # Fancy Print Statement for valid_moves
     show_choices = []
@@ -119,12 +103,6 @@ def process_move(valid_moves, piece, capture=False):
         process_move(valid_moves, piece)
 
 
-def select_piece(pieces):
-    selected_piece = cycle_through_pieces(pieces)
-    # print(selected_piece.name, selected_piece.xy_coord)
-    return selected_piece
-
-
 def check_capturable_moves(selected_piece, team):
     can_this_move = checkers_board.is_regular_move_valid(selected_piece)
     print(f"Debug for capture can_this_move {can_this_move}")
@@ -143,6 +121,19 @@ def check_capturable_moves(selected_piece, team):
                         capturable_moves[move] = opp_piece.moves[move]
 
     return capturable_moves
+
+"""
+Turn/Board Logic
+"""
+
+def player_turn(team, name):
+    print(f"Player {name} Turn")
+    if team == "white":
+        # Add logic to force capture before piece selection
+        process_piece_selection(team, checkers_board.white_pieces)
+    elif team == "black":
+        # Add logic to force capture before piece selection
+        process_piece_selection(team, checkers_board.black_pieces)
 
 
 def process_piece_selection(team, pieces, recursion=False):
@@ -170,14 +161,34 @@ def process_piece_selection(team, pieces, recursion=False):
             process_move(valid_moves, selected_piece)
 
 
-def player_turn(team, name):
-    print(f"Player {name} Turn")
-    if team == "white":
-        # Add logic to force capture before piece selection
-        process_piece_selection(team, checkers_board.white_pieces)
-    elif team == "black":
-        # Add logic to force capture before piece selection
-        process_piece_selection(team, checkers_board.black_pieces)
+def select_piece(pieces):
+    selected_piece = cycle_through_pieces(pieces)
+    # print(selected_piece.name, selected_piece.xy_coord)
+    return selected_piece
+
+
+def cycle_through_pieces(list_of_pieces): # Allow player to cycle through all available game_pieces
+    list_length = len(list_of_pieces)
+    index = 0
+    selected_piece = None
+
+    while selected_piece is None:
+        current_piece = list_of_pieces[index]
+        visual_display(current_piece)   # Visual Board in Terminal
+        user_input = input("Enter 'q' for previous, 'e' for next or 's' to select: ")
+
+        if user_input == "q":
+            index = (index - 1) % list_length
+            continue
+        elif user_input == "e":
+            index = (index + 1) % list_length
+            continue
+        elif user_input == "s":
+            selected_piece = current_piece
+        else:
+            print("Invalid Input. Try Again")
+
+    return selected_piece
 
 
 # Generate Board & Pieces
