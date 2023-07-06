@@ -1,10 +1,40 @@
 from board.board import *
 
-"""
-Currently check_valid_move only looks to see if the move is possible
-on an 8x8 board. This causes issues if i need to know if the move is valid
-because another piece is on the board at that location.
-"""
+
+def board_force_capture(all_team_pieces):
+    pass
+    '''
+    I need to have the game force the player to capture
+    a piece if available and not give him a choice to 
+    select a non-capturing piece
+    '''
+
+
+def king_me(regular_piece):
+    pass
+    """
+    Option 1 (Better Idea)
+    When a piece reaches (x,8) or (1,x) we must add the king tag to the piece
+    This allows king pieces to access new functionality in things like
+    check_valid_move or capture_piece to move/capture in all directions
+    Pros:
+    No new objects
+
+    Cons:
+    Rewrite current game logic func to account for new is_king attr. flag
+
+    Option (Worse Idea)
+    During king_me we remove the regular game_piece from the board and replace it 
+    with a king_piece subclass with added functionality.
+    Pros:
+        - New king_piece subclass, new functionality
+        - Seperation of concerns with pieces.
+    Cons:
+        - Write entirely new game logic funcs specifically for kings
+          and reuse a bunch of current regular piece func logic
+        - Will have to add logic check for whether or not selected piece is 
+          king to determine correct proccess_move funcs
+    """
 
 
 def visual_block(current_piece):
@@ -160,15 +190,6 @@ def player_turn(team, name):
     elif team == "black":
         # Add logic to force capture before piece selection
         process_piece_selection(team, checkers_board.black_pieces)
-
-
-def board_force_capture():
-    '''
-    I need to have the game force the player to capture
-    a piece if available and not give him a choice to 
-    select a non-capturing piece
-    '''
-    pass
 
 
 # Generate Board & Pieces
