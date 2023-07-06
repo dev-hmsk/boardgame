@@ -148,7 +148,9 @@ def board_force_capture(team, all_team_pieces):
     else: # Dict has no valid captures. Return False
         return False
 
-
+"""
+Bug #1 Check recursive logic
+"""
 def process_piece_selection(team, pieces, recursion=False):
     if recursion is True:
         selected_piece = pieces  # pieces always a single obj here due to prior recursion
