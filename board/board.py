@@ -12,6 +12,7 @@ class Game_Piece():
 class Checkers_Game_Piece(Game_Piece):
     def __init__(self, color, number):
         super().__init__(color, number)
+        self.is_king = False
         self.moves = {
             "move_nw": None,
             "move_ne": None,
@@ -54,7 +55,7 @@ class Board():
         self.board_space_color = self._generate_board_space_color(self.xy_coord)
         self.black_spaces = self.board_space_color[0] # Sorted List 
         self.white_spaces = self.board_space_color[1] # Sorted List
-        self.visual = self._generate_visual() # Updates terminal with visual
+        self.visual = self._generate_visual_board() # Updates terminal with visual
 
     def _generate_dimension(self):
         board_coor = {}
@@ -86,7 +87,76 @@ class Board():
         sorted_white_list = sorted(white_spaces, key=lambda x: x[0])
         return sorted_black_list, sorted_white_list  # Return black and then white
 
+    def generate_visual_with_flashing(self, flashing_position):  # Public wrapper for assorted private _generate_visual funcs
+        return self._generate_visual_board(flashing_position)
+    
+    def _generate_visual_board(self, flashing_position=None):
+        """
+        Generates the visual representation of the board, including coordinates on the left side and bottom.
+
+        Parameters:
+        - flashing_position: Optional. The (x, y) coordinate to be highlighted as flashing.
+
+        Description:
+        The function iterates through each row and column of the board to build the visual.
+        It creates an empty `board_display` string to store the generated visual representation.
+
+        For each row (y-coordinate) in reverse order:
+            - The y-coordinate is added to the 'board_display string as the left-side coordinate label.
+            - For each column (x-coordinate) from 1 to self.x_coord:
+                - The `(x, y)` coordinate is assigned to xy_coord.
+                - If `xy_coord` matches the `flashing_position`, the`flashing` variable is set to True, else set to False.
+                - The visual representation of the position is generated using the `_generate_position_visual`
+                function, passing `xy_coord` and `flashing` as arguments.
+                - The generated visual_piece is appended to the `board_display` string.
+            - A newline character is added to the `board_display` string to start a new row.
+
+        After iterating through all rows, the horizontal coordinate labels are added to the `board_display` string.
+        
+        Returns:
+        - A string representing the visual representation of the board.
+
+        Note:
+        - The `print("\033[H\033[J")` line is a visual trick to clear the terminal screen and make it look cleaner. It can be safely commented out for debugging purposes.
+        """
+            
+        board_display = ""
+        for y in range(self.y_coord, 0, -1):
+            board_display += f" {y} "
+            for x in range(1, self.x_coord + 1):
+                xy_coord = (x, y)
+                if xy_coord == flashing_position:
+                    flashing = True
+                else:
+                    flashing = False
+                board_display += self._generate_position_visual(xy_coord, flashing)
+            board_display += "\n"
+        board_display += "   "
+        for x in range(1, self.x_coord + 1):
+            board_display += f" {x} "
+        print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
+        return board_display
+
     def _generate_position_visual(self, xy_coord, flashing=False):
+        """
+        Purpose:
+        - Generates the visual representation of a specific position on the board.
+
+        Params:
+        - xy_coord: The (x, y) coordinate of the position.
+        - flashing: Optional. Specifies whether the position should be highlighted as flashing.
+
+        Return:
+        - A string representing the visual representation of the position on the board.
+
+        Logic:
+        - The function checks the `xy_coord` position on the board and determines the visual representation based on the following conditions:
+            - If the position is `None` and belongs to the black spaces, it generates a black tile visual space.
+            - If the position is `None` and belongs to the white spaces, it generates a dark_grey or white tile visual space.
+            - If the position is not `None`, it represents a game piece. The function retrieves the piece and generates the visual representation based on its team.
+                - For white pieces, if `flashing` is True, it generates a flashing white piece representation; otherwise, a normal white piece representation.
+                - For black pieces, if `flashing` is True, it generates a flashing dark grey piece representation; otherwise, a normal dark grey piece representation.
+        """
         if self.xy_coord[xy_coord] is None and (xy_coord in self.black_spaces):  # If empty space on black tile
             background_color = "\033[30m"  # Black option
             reset_color = "\033[0m"  # Neutral terminal color
@@ -101,7 +171,6 @@ class Board():
         else:
             piece = self.xy_coord[xy_coord]
             visual_piece = "o"
-            # board_location = piece.xy_coord
             if piece.team == "white":
                 if flashing:
                     return f"[\033[37;5m{visual_piece}\033[0m]"
@@ -112,24 +181,6 @@ class Board():
                     return f"[\033[5;90m{visual_piece}\033[0m]"
                 else:
                     return f" \033[90m{visual_piece}\033[0m "
-
-    def _generate_visual(self, flashing_position=None):  # Generate visual representation with coordinates on the leftside and bottom
-        visual_object = ""
-        for y in range(self.y_coord, 0, -1):
-            visual_object += f" {y} "
-            for x in range(1, self.x_coord + 1):
-                xy_coord = (x, y)
-                if xy_coord == flashing_position:
-                    flashing = True
-                else:
-                    flashing = False
-                visual_object += self._generate_position_visual(xy_coord, flashing)
-            visual_object += "\n"
-        visual_object += "   "
-        for x in range(1, self.x_coord + 1):
-            visual_object += f" {x} "
-        # print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
-        return visual_object
 
     def _place_at_location(self, xy_coord, piece):
         if self.xy_coord[xy_coord] is None:  # If space is empty, place piece and return True
@@ -179,8 +230,8 @@ class Checkers_Board(Board):
     def __init__(self):
         super().__init__((8, 8))
         # List of white/black objects
-        self.white_pieces = self.create_pieces("white")
-        self.black_pieces = self.create_pieces("black")
+        self.white_pieces = self._create_pieces("white")
+        self.black_pieces = self._create_pieces("black")
 
     def board_setup(self):  # Place all Checker Pieces
         white_start_coord_unsort = []
@@ -210,9 +261,9 @@ class Checkers_Board(Board):
             black_piece = self.black_pieces[i]
             self._place_at_location(black_xy_coord, black_piece)
             self.black_pieces[i].update_position(black_xy_coord)
-        self.visual = self._generate_visual()  # Update visual board in terminal
+        self.visual = self._generate_visual_board()  # Update visual board in terminal
 
-    def create_pieces(self, name):
+    def _create_pieces(self, name):
         piece_list = []
         for i in range(1, 13):
             obj = Checkers_Game_Piece(name, i)
@@ -255,15 +306,13 @@ class Checkers_Board(Board):
                     black_moves["move_ne"] = True
             return black_moves
 
-    def can_capture(self, starting_loc, opp_piece):
-        # We add the opposite direction
-        # So we if start from the sw of the opp piece we check the ne
-        # print(f"Debug can_capture starting_loc arg {starting_loc}")
+    def check_for_capture(self, starting_loc, opp_piece):
+        # print(f"Debug check_fo_capture starting_loc arg {starting_loc}")
         space_behind = opp_piece.moves[starting_loc]
-        # print(f"Debug can_capture() space_behind {space_behind}")
+        # print(f"Debug check_for_capture() space_behind {space_behind}")
         if space_behind is not None:
             check_space = self.get_from_location(space_behind)
-            # print(f"Debug can_capture() check_space {check_space}")
+            # print(f"Debug check_for_capture() check_space {check_space}")
             if check_space is None:
                 # print(f"Debug Space at {space_behind} behind {opp_piece} is Empty")
                 print("You must capture this piece")
@@ -273,16 +322,18 @@ class Checkers_Board(Board):
         else:
             return False
 
-    def remove_piece(self, xy_coord):
+    def remove_piece_from_game(self, xy_coord): 
+        # Removes piece from the board and its 
+        # respective teams list of pieces
         piece_to_remove = self.xy_coord[xy_coord]
         name_to_remove = piece_to_remove.name
-        if piece_to_remove is not None:
-            if piece_to_remove.team == "white":
-                for piece in self.white_pieces:
-                    if piece.name == name_to_remove:
-                        self.white_pieces.remove(piece)
-            elif piece_to_remove.team == "black":
-                for piece in self.black_pieces:
-                    if piece.name == name_to_remove:
-                        self.black_pieces.remove(piece)
-            self.xy_coord[xy_coord] = None
+
+        if piece_to_remove.team == "white":
+            for piece in self.white_pieces:
+                if piece.name == name_to_remove:
+                    self.white_pieces.remove(piece)
+        elif piece_to_remove.team == "black":
+            for piece in self.black_pieces:
+                if piece.name == name_to_remove:
+                    self.black_pieces.remove(piece)
+        self.xy_coord[xy_coord] = None

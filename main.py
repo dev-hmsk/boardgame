@@ -7,6 +7,14 @@ def board_force_capture(all_team_pieces):
     I need to have the game force the player to capture
     a piece if available and not give him a choice to 
     select a non-capturing piece
+
+    We could iterate through Checkers_Board.white/black_pieces
+    which is a list of piece obj. If piece obj has a valid capturable 
+    move, skip piece selection and make it the only selected piece.
+    You theoritcally can have multiple valid capture moves
+    at the start of your turn. so we make another dict to list all valid 
+    capture moves. This logic already exists in the below funcs so we can
+    retool or pass arg flags.
     '''
 
 
@@ -37,10 +45,10 @@ def king_me(regular_piece):
     """
 
 
-def visual_block(current_piece):
+def visual_display(current_piece):
     # Visual Block
     flashing_position = current_piece.xy_coord
-    visual = checkers_board._generate_visual(flashing_position)
+    visual = checkers_board.generate_visual_with_flashing(flashing_position)
     piece_number = current_piece.name.split("_")[-1]
     print(f"      {current_piece.team.capitalize()} Players Turn")
     print("   " + "-" * 24)
@@ -55,8 +63,7 @@ def cycle_through_pieces(list_of_pieces): # Allow player to cycle through all av
 
     while selected_piece is None:
         current_piece = list_of_pieces[index]
-        # Visual Board in Terminal
-        visual_block(current_piece)
+        visual_display(current_piece)   # Visual Board in Terminal
         user_input = input("Enter 'q' for previous, 'e' for next or 's' to select: ")
 
         if user_input == "q":
@@ -80,17 +87,27 @@ def show_valid_moves(valid_moves): # Fancy Print Statement for valid_moves
             show_choices.append(name)
     return show_choices
 
-"""
-make_valid_move() and capture_piece() below can eventually
-be combined with a 3rd arg -> can_capture=False/True 
-to act as a flag to process capturing the piece
-"""
 
-def make_valid_move(valid_moves, piece):
+def process_move(valid_moves, piece, capture=False):
     player_options = show_valid_moves(valid_moves)
     print(f"Here are your valid moves: {player_options}")
     user_input = input("Make a choice: ")
-    if user_input in valid_moves:
+    
+    if (user_input in valid_moves) and (capture is True): # If you can capture do so
+        selected_move = valid_moves[user_input]
+        capture_coord = piece.moves[user_input]
+        print(f"Debug capture {capture_coord}")
+        checkers_board.remove_piece_from_game(capture_coord)  # Remove captured Piece from
+        checkers_board.move(selected_move, piece)  # Move Player piece to new coord
+        checkers_board.remove_from_location(piece.xy_coord) # Remove Player piece from old coord
+        print(f"Debug selected_move {selected_move}")
+        print(f"Debug piece.moves {piece.moves}")
+        piece.xy_coord = selected_move  # Update (x, y) of piece.xy_coord attr
+        print(f"debug of piece.xy_coord {piece.xy_coord}")
+        piece.check_valid_move()  # Update piece.moves to reflect new possible moves
+        print(f"Debug of updated piece.moves {piece.moves}") 
+
+    elif user_input in valid_moves:  # If you can't capture, move regularly
         print(f"You choice was to move to {user_input}")
         selected_move = piece.moves[user_input]
         checkers_board.move(selected_move, piece)  # Move piece to (x, y) location
@@ -99,35 +116,7 @@ def make_valid_move(valid_moves, piece):
         piece.check_valid_move()  # Update piece.moves to reflect new possible moves
     else:
         print("Invalid Move. Try Again")
-        make_valid_move(valid_moves, piece)
-
-
-def capture_piece(capturable_moves, piece):
-    player_options = show_valid_moves(capturable_moves)
-    # print(f"Debug capturable_moves capturable_moves}")
-    print(f"Here are your valid capture moves: {player_options}")
-    user_input = input("Make a choice: ")
-    if user_input in capturable_moves:
-        selected_move = capturable_moves[user_input]
-        capture_coord = piece.moves[user_input]
-        print(f"Debug capture {capture_coord}")
-        checkers_board.remove_piece(capture_coord)
-        checkers_board.move(selected_move, piece) # Move Player piece to new coord
-        checkers_board.remove_from_location(piece.xy_coord) # Remove Player piece from old coord
-        print(f"Debug selected_move {selected_move}")
-        print(f"Debug piece.moves {piece.moves}")
-        piece.xy_coord = selected_move  # Update (x, y) of piece.xy_coord attr
-        print(f"debug of piece.xy_coord {piece.xy_coord}")
-        piece.check_valid_move()  # Update piece.moves to reflect new possible moves
-        """
-        check_valid_move() only looks to see if the move is possible on the 
-        given game board. it does not check if the spaces are occupied.
-        """
-        
-        print(f"Debug of updated piece.moves {piece.moves}")   
-    else:
-        print("Invalid Move. Try Again")
-        make_valid_move(capturable_moves, piece)
+        process_move(valid_moves, piece)
 
 
 def select_piece(pieces):
@@ -148,7 +137,7 @@ def check_capturable_moves(selected_piece, team):
                 opp_piece = checkers_board.get_from_location(check_space)
                 print(f"Debug for opp_piece{opp_piece}")
                 if opp_piece.team != team:
-                    check_capture_condition = checkers_board.can_capture(move, opp_piece)
+                    check_capture_condition = checkers_board.check_for_capture(move, opp_piece)
                     print(f"Debug for check_capture_condition {check_capture_condition}")
                     if check_capture_condition is True:
                         capturable_moves[move] = opp_piece.moves[move]
@@ -158,19 +147,18 @@ def check_capturable_moves(selected_piece, team):
 
 def process_piece_selection(team, pieces, recursion=False):
     if recursion is True:
-        selected_piece = pieces
-        # Visual Board in Terminal
-        visual_block(selected_piece)
+        selected_piece = pieces  # pieces always a single obj here due to prior recursion
+        visual_display(selected_piece)  # Visual Board in Terminal
     else:
         selected_piece = select_piece(pieces)
     capturable_moves = check_capturable_moves(selected_piece, team)
     if capturable_moves:
-        print(f"Debug moves before capture {selected_piece.moves}")
-        capture_piece(capturable_moves, selected_piece)
-        print(f"Debug moves after capture {selected_piece.moves}")
-        print(f"Debug moves after is_regular_move_valid {selected_piece.moves}")
+        # print(f"Debug moves before capture {selected_piece.moves}")
+        process_move(capturable_moves, selected_piece, capture=True)
+        # print(f"Debug moves after capture {selected_piece.moves}")
+        # print(f"Debug moves after is_regular_move_valid {selected_piece.moves}")
         new_capture_choices = check_capturable_moves(selected_piece, team)
-        print(f"Debug new_capture_choices{new_capture_choices}")
+        # print(f"Debug new_capture_choices{new_capture_choices}")
         if new_capture_choices:  # If new choice start recursion
             process_piece_selection(team, selected_piece, recursion=True)
     else:
@@ -179,7 +167,7 @@ def process_piece_selection(team, pieces, recursion=False):
             print("This piece has no valid moves. Select another piece")
             process_piece_selection(team, pieces)
         else:
-            make_valid_move(valid_moves, selected_piece)
+            process_move(valid_moves, selected_piece)
 
 
 def player_turn(team, name):
