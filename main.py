@@ -23,33 +23,6 @@ def board_force_capture(all_team_pieces):
     '''
 
 
-def king_me(regular_piece):
-    pass
-    """
-    Option 1 (Better Idea)
-    When a piece reaches (x,8) or (x,1) we must add the king tag to the piece
-    This allows king pieces to access new functionality in things like
-    check_valid_move or capture_piece to move/capture in all directions
-    Pros:
-    No new objects
-
-    Cons:
-    Rewrite current game logic func to account for new is_king attr. flag
-
-    Option (Worse Idea)
-    During king_me we remove the regular game_piece from the board and replace it 
-    with a king_piece subclass with added functionality.
-    Pros:
-        - New king_piece subclass, new functionality
-        - Seperation of concerns with pieces.
-    Cons:
-        - Write entirely new game logic funcs specifically for kings
-          and reuse a bunch of current regular piece func logic
-        - Will have to add logic check for whether or not selected piece is 
-          king to determine correct proccess_move funcs
-    """
-
-
 def visual_display(current_piece):
     # Visual Block
     flashing_position = current_piece.xy_coord
@@ -89,6 +62,7 @@ def process_move(valid_moves, piece, capture=False):
         piece.xy_coord = selected_move  # Update (x, y) of piece.xy_coord attr
         print(f"debug of piece.xy_coord {piece.xy_coord}")
         piece.check_valid_move()  # Update piece.moves to reflect new possible moves
+        checkers_board.check_king_me(piece)  # Update piece.is_king if possible
         print(f"Debug of updated piece.moves {piece.moves}") 
 
     elif user_input in valid_moves:  # If you can't capture, move regularly
@@ -98,6 +72,7 @@ def process_move(valid_moves, piece, capture=False):
         checkers_board.remove_from_location(piece.xy_coord)  # Remove piece from board at its previous (x, y)
         piece.xy_coord = selected_move  # Update (x, y) of piece.xy_coord attr
         piece.check_valid_move()  # Update piece.moves to reflect new possible moves
+        checkers_board.check_king_me(piece)  # Update piece.is_king if possible
     else:
         print("Invalid Move. Try Again")
         process_move(valid_moves, piece)

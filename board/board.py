@@ -20,6 +20,14 @@ class Checkers_Game_Piece(Game_Piece):
             "move_se": None
         }
 
+    def king_me(self):
+        self.is_king = True
+        return
+
+    # def demote(self):  # Not currently required
+    #     self.is_king = False
+    #     return
+
     def check_valid_move(self):
         self.moves.update({key: None for key in self.moves})  # Reset possible moves before check
         if (self.xy_coord[0] - 1 >= 1) and (self.xy_coord[1] + 1 <= 8):  # Check NW
@@ -30,7 +38,7 @@ class Checkers_Game_Piece(Game_Piece):
             self.moves["move_sw"] = self.xy_coord[0] - 1, self.xy_coord[1] - 1
         if (self.xy_coord[0] + 1 <= 8) and (self.xy_coord[1] - 1 <= 8):  # Check SE
             self.moves["move_se"] = self.xy_coord[0] + 1, self.xy_coord[1] - 1
-        
+
         # If coordinate is less than 1 or greater than 8 in x or y its invalid so remove it and set to None
         for key, xy_coord in self.moves.items():
             try:
@@ -134,7 +142,7 @@ class Board():
         board_display += "   "
         for x in range(1, self.x_coord + 1):
             board_display += f" {x} "
-        print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
+        # print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
         return board_display
 
     def _generate_position_visual(self, xy_coord, flashing=False):
@@ -232,9 +240,9 @@ class Checkers_Board(Board):
         # List of white/black objects
         self.white_pieces = self._create_pieces("white")
         self.black_pieces = self._create_pieces("black")
-        self.all_king_rows = self._make_king_row()
-        self.white_king_row = self.all_king_rows[0]  # This is (x, 8) row list
-        self.black_king_row = self.all_king_rows[1]  # This is (x, 1) row list
+        self.all_king_rows = self._create_king_row()
+        self.white_side_king_row = self.all_king_rows[0]  # This is (x, 8) row list
+        self.black_side_king_row = self.all_king_rows[1]  # This is (x, 1) row list
     
     def board_setup(self):  # Place all Checker Pieces
         white_start_coord_unsort = []
@@ -273,18 +281,47 @@ class Checkers_Board(Board):
             piece_list.append(obj)
         return piece_list
     
-    def _make_king_row(self):
-        white_king_row = []
-        black_king_row = []
+    def _create_king_row(self):
+        white_side_king_row = []
+        black__side_king_row = []
         for x_coord in range(1,9):
-            white_king_row.append(x_coord, 8)
-            black_king_row.append(x_coord, 1)
+            white_side_king_row.append((x_coord, 8))
+            black__side_king_row.append((x_coord, 1))
         
-        return white_king_row, black_king_row
+        return white_side_king_row, black__side_king_row
 
     def is_regular_move_valid(self, piece):  # Valid Non-King moves
         piece.check_valid_move()  # Update piece.moves
-        if piece.team == "white":  # White starts Top and must move Down
+        if piece.is_king:
+            nw = piece.moves["move_nw"]  # NW
+            ne = piece.moves["move_ne"]  # NE
+            sw = piece.moves["move_sw"]  # SW
+            se = piece.moves["move_se"]  # SE
+            king_moves = {
+                "move_nw": False,
+                "move_ne": False,
+                "move_sw": False,
+                "move_se": False
+            }
+            if nw is not None:
+                nw_space = self.get_from_location(nw)
+                if nw_space is None:
+                    king_moves["move_nw"] = True
+            if ne is not None:
+                ne_space = self.get_from_location(ne)
+                if ne_space is None:
+                    king_moves["move_ne"] = True
+            if sw is not None:
+                sw_space = self.get_from_location(sw)
+                if sw_space is None:
+                    king_moves["move_sw"] = True
+            if se is not None:
+                se_space = self.get_from_location(se)
+                if se_space is None:
+                    king_moves["move_se"] = True
+            return king_moves
+        
+        elif piece.team == "white":  # White starts Top and must move Down
             sw = piece.moves["move_sw"]  # SW
             se = piece.moves["move_se"]  # SE
             white_moves = {
@@ -301,7 +338,7 @@ class Checkers_Board(Board):
                     white_moves["move_se"] = True
             return white_moves
 
-        if piece.team == "black":  # Black starts Bottom and must move Up
+        elif piece.team == "black":  # Black starts Bottom and must move Up
             nw = piece.moves["move_nw"]  # NW
             ne = piece.moves["move_ne"]  # NE
             black_moves = {
@@ -319,14 +356,14 @@ class Checkers_Board(Board):
             return black_moves
 
     def check_for_capture(self, starting_loc, opp_piece):
-        # print(f"Debug check_fo_capture starting_loc arg {starting_loc}")
+        print(f"Debug check_fo_capture starting_loc arg {starting_loc}")
         space_behind = opp_piece.moves[starting_loc]
-        # print(f"Debug check_for_capture() space_behind {space_behind}")
+        print(f"Debug check_for_capture() space_behind {space_behind}")
         if space_behind is not None:
             check_space = self.get_from_location(space_behind)
-            # print(f"Debug check_for_capture() check_space {check_space}")
+            print(f"Debug check_for_capture() check_space {check_space}")
             if check_space is None:
-                # print(f"Debug Space at {space_behind} behind {opp_piece} is Empty")
+                print(f"Debug Space at {space_behind} behind {opp_piece} is Empty")
                 print("You must capture this piece")
                 return True
             else:
@@ -349,3 +386,41 @@ class Checkers_Board(Board):
                 if piece.name == name_to_remove:
                     self.black_pieces.remove(piece)
         self.xy_coord[xy_coord] = None
+
+
+    def check_king_me(self, regular_piece):
+        if (regular_piece.team == "white") and (regular_piece.xy_coord in self.black_side_king_row): 
+            print("check_king_me_block")
+            regular_piece.king_me()
+            print(f"Debug for piece.is_king {regular_piece.is_king}")
+        
+        elif (regular_piece.team == "black") and (regular_piece.xy_coord in self.white_side_king_row): 
+            print("check_king_me_block")
+            regular_piece.king_me()
+            print(f"Debug for piece.is_king {regular_piece.is_king}")
+
+        else:
+            return
+        """
+        Option 1 (Better Idea)
+        When a piece reaches (x,8) or (x,1) we must add the king tag to the piece
+        This allows king pieces to access new functionality in things like
+        check_valid_move or capture_piece to move/capture in all directions
+        Pros:
+        No new objects
+
+        Cons:
+        Rewrite current game logic func to account for new is_king attr. flag
+
+        Option (Worse Idea)
+        During king_me we remove the regular game_piece from the board and replace it 
+        with a king_piece subclass with added functionality.
+        Pros:
+            - New king_piece subclass, new functionality
+            - Seperation of concerns with pieces.
+        Cons:
+            - Write entirely new game logic funcs specifically for kings
+            and reuse a bunch of current regular piece func logic
+            - Will have to add logic check for whether or not selected piece is 
+            king to determine correct proccess_move funcs
+        """
