@@ -21,15 +21,25 @@ class Checkers_Game_Piece(Game_Piece):
 
     def check_valid_move(self):
         self.moves.update({key: None for key in self.moves})  # Reset possible moves before check
-        xy_coord_copy = self.xy_coord
-        if (xy_coord_copy[0] - 1 >= 1) and (xy_coord_copy[1] + 1 <= 8):  # Check NW
-            self.moves["move_nw"] = xy_coord_copy[0] - 1, xy_coord_copy[1] + 1
-        if (xy_coord_copy[0] + 1 <= 8) and (xy_coord_copy[1] + 1 <= 8):  # Check NE
-            self.moves["move_ne"] = xy_coord_copy[0] + 1, xy_coord_copy[1] + 1
-        if (xy_coord_copy[0] - 1 >= 1) and (xy_coord_copy[1] - 1 >= 1):  # Check SW
-            self.moves["move_sw"] = xy_coord_copy[0] - 1, xy_coord_copy[1] - 1
-        if (xy_coord_copy[0] + 1 <= 8) and (xy_coord_copy[1] - 1 <= 8):  # Check SE
-            self.moves["move_se"] = xy_coord_copy[0] + 1, xy_coord_copy[1] - 1
+        if (self.xy_coord[0] - 1 >= 1) and (self.xy_coord[1] + 1 <= 8):  # Check NW
+            self.moves["move_nw"] = self.xy_coord[0] - 1, self.xy_coord[1] + 1
+        if (self.xy_coord[0] + 1 <= 8) and (self.xy_coord[1] + 1 <= 8):  # Check NE
+            self.moves["move_ne"] = self.xy_coord[0] + 1, self.xy_coord[1] + 1
+        if (self.xy_coord[0] - 1 >= 1) and (self.xy_coord[1] - 1 >= 1):  # Check SW
+            self.moves["move_sw"] = self.xy_coord[0] - 1, self.xy_coord[1] - 1
+        if (self.xy_coord[0] + 1 <= 8) and (self.xy_coord[1] - 1 <= 8):  # Check SE
+            self.moves["move_se"] = self.xy_coord[0] + 1, self.xy_coord[1] - 1
+        
+        # If coordinate is less than 1 or greater than 8 in x or y its invalid so remove it and set to None
+        for key, xy_coord in self.moves.items():
+            try:
+                if xy_coord is not None and (xy_coord[0] < 1) or (xy_coord[1] < 1) or (xy_coord[0] > 8) or (xy_coord[1] > 8):
+                    self.moves[key] = None
+            except TypeError:
+                # This fixes NoneType object is not subscriptable
+                # It occurs if a piece is at the edge of a board
+                pass
+        print(f"Debug self.moves {self.moves}")
         return self.moves
 
 
@@ -42,8 +52,8 @@ class Board():
         self.y_coord = dimension[1]
         self.xy_coord = self._generate_dimension() # This is a dict that contains all (x,y) locations and Game_Piece objs on board
         self.board_space_color = self._generate_board_space_color(self.xy_coord)
-        self.black_spaces = self.board_space_color[0]
-        self.white_spaces = self.board_space_color[1]
+        self.black_spaces = self.board_space_color[0] # Sorted List 
+        self.white_spaces = self.board_space_color[1] # Sorted List
         self.visual = self._generate_visual() # Updates terminal with visual
 
     def _generate_dimension(self):
@@ -118,7 +128,7 @@ class Board():
         visual_object += "   "
         for x in range(1, self.x_coord + 1):
             visual_object += f" {x} "
-        print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
+        # print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
         return visual_object
 
     def _place_at_location(self, xy_coord, piece):
@@ -129,7 +139,14 @@ class Board():
             return False, (f"Invalid move, {self.xy_coord[xy_coord]} is already located at {xy_coord}")
 
     def get_from_location(self, xy_coord):  # Return whatever is at the given x,y coord
-        return self.xy_coord[xy_coord]
+        """
+        Add Defensive logic if provided xy_coord is out of bounds
+        We can use self.xy_coord (dict) or self.black_spaces + self.white_spaces (sorted list)
+        """
+        try:
+            return self.xy_coord[xy_coord]
+        except KeyError:
+            return None
 
     def remove_from_location(self, xy_coord, capture=False):  # Remove piece at location
         if self.xy_coord[xy_coord] is None:

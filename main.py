@@ -80,21 +80,21 @@ def capture_piece(capturable_moves, piece):
     if user_input in capturable_moves:
         selected_move = capturable_moves[user_input]
         capture_coord = piece.moves[user_input]
-        # print(f"Debug capture {capture_coord}")
+        print(f"Debug capture {capture_coord}")
         checkers_board.remove_piece(capture_coord)
         checkers_board.move(selected_move, piece) # Move Player piece to new coord
         checkers_board.remove_from_location(piece.xy_coord) # Remove Player piece from old coord
-        # print(f"Debug selected_move {selected_move}")
-        # print(f"Debug piece.moves {piece.moves}")
+        print(f"Debug selected_move {selected_move}")
+        print(f"Debug piece.moves {piece.moves}")
         piece.xy_coord = selected_move  # Update (x, y) of piece.xy_coord attr
-        # print(f"debug of piece.xy_coord {piece.xy_coord}")
+        print(f"debug of piece.xy_coord {piece.xy_coord}")
         piece.check_valid_move()  # Update piece.moves to reflect new possible moves
         """
         check_valid_move() only looks to see if the move is possible on the 
         given game board. it does not check if the spaces are occupied.
         """
         
-        # print(f"Debug of updated piece.moves {piece.moves}")   
+        print(f"Debug of updated piece.moves {piece.moves}")   
     else:
         print("Invalid Move. Try Again")
         make_valid_move(capturable_moves, piece)
@@ -108,18 +108,18 @@ def select_piece(pieces):
 
 def check_capturable_moves(selected_piece, team):
     can_this_move = checkers_board.is_regular_move_valid(selected_piece)
-    # print(f"Debug for capture can_this_move {can_this_move}")
+    print(f"Debug for capture can_this_move {can_this_move}")
     capturable_moves = {}
     for move in can_this_move:
         if can_this_move[move] is False:
             check_space = selected_piece.moves[move]
-            # print(f"Debug for check_space {check_space}")
+            print(f"Debug for check_space {check_space}")
             if check_space is not None:
                 opp_piece = checkers_board.get_from_location(check_space)
-                # print(f"Debug for opp_piece{opp_piece}")
+                print(f"Debug for opp_piece{opp_piece}")
                 if opp_piece.team != team:
                     check_capture_condition = checkers_board.can_capture(move, opp_piece)
-                    # print(f"Debug for check_capture_condition {check_capture_condition}")
+                    print(f"Debug for check_capture_condition {check_capture_condition}")
                     if check_capture_condition is True:
                         capturable_moves[move] = opp_piece.moves[move]
 
@@ -135,12 +135,12 @@ def process_piece_selection(team, pieces, recursion=False):
         selected_piece = select_piece(pieces)
     capturable_moves = check_capturable_moves(selected_piece, team)
     if capturable_moves:
-        # print(f"Debug moves before capture {selected_piece.moves}")
+        print(f"Debug moves before capture {selected_piece.moves}")
         capture_piece(capturable_moves, selected_piece)
-        # print(f"Debug moves after capture {selected_piece.moves}")
-        # print(f"Debug moves after is_regular_move_valid {selected_piece.moves}")
+        print(f"Debug moves after capture {selected_piece.moves}")
+        print(f"Debug moves after is_regular_move_valid {selected_piece.moves}")
         new_capture_choices = check_capturable_moves(selected_piece, team)
-        # print(f"Debug new_capture_choices{new_capture_choices}")
+        print(f"Debug new_capture_choices{new_capture_choices}")
         if new_capture_choices:  # If new choice start recursion
             process_piece_selection(team, selected_piece, recursion=True)
     else:
@@ -174,6 +174,7 @@ def board_force_capture():
 # Generate Board & Pieces
 checkers_board = Checkers_Board()
 checkers_board.board_setup()
+print(checkers_board.xy_coord)
 # print(checkers_board.visual)
 # print(checkers_board.get_state())
 
