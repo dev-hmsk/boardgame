@@ -241,14 +241,14 @@ class Checkers_Board(Board):
     def can_capture(self, starting_loc, opp_piece):
         # We add the opposite direction
         # So we if start from the sw of the opp piece we check the ne
-        print(f"can_capture starting_loc arg debug {starting_loc}")
+        # print(f"Debug can_capture starting_loc arg {starting_loc}")
         space_behind = opp_piece.moves[starting_loc]
-        print(f"can_capture() space_behind debug {space_behind}")
+        # print(f"Debug can_capture() space_behind {space_behind}")
         if space_behind is not None:
             check_space = self.get_from_location(space_behind)
-            print(f"can_capture() check_space debug {check_space}")
+            # print(f"Debug can_capture() check_space {check_space}")
             if check_space is None:
-                print(f"Space at {space_behind} behind {opp_piece} is Empty")
+                # print(f"Debug Space at {space_behind} behind {opp_piece} is Empty")
                 print("You must capture this piece")
                 return True
             else:
