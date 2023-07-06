@@ -1,4 +1,4 @@
-# Piece Super & Sub class
+# Game_Piece Super & Sub class
 class Game_Piece():
     def __init__(self, color, number):
         self.name = color + "_piece_" + str(number)
@@ -23,10 +23,11 @@ class Checkers_Game_Piece(Game_Piece):
     def king_me(self):
         self.is_king = True
         return
-
-    # def demote(self):  # Not currently required
-    #     self.is_king = False
-    #     return
+    """
+    def demote(self):  # Not currently required
+        self.is_king = False
+        return
+    """
 
     def check_valid_move(self):
         self.moves.update({key: None for key in self.moves})  # Reset possible moves before check
@@ -38,17 +39,22 @@ class Checkers_Game_Piece(Game_Piece):
             self.moves["move_sw"] = self.xy_coord[0] - 1, self.xy_coord[1] - 1
         if (self.xy_coord[0] + 1 <= 8) and (self.xy_coord[1] - 1 <= 8):  # Check SE
             self.moves["move_se"] = self.xy_coord[0] + 1, self.xy_coord[1] - 1
-
-        # If coordinate is less than 1 or greater than 8 in x or y its invalid so remove it and set to None
+        """
+        If coordinate is less than 1 or greater than 8 in x or y 
+        its invalid so remove it and set to None. We hardcode because 
+        board game min/max dimensions are not known to a Checkers_Game_Piece()
+        """
         for key, xy_coord in self.moves.items():
             try:
                 if xy_coord is not None and (xy_coord[0] < 1) or (xy_coord[1] < 1) or (xy_coord[0] > 8) or (xy_coord[1] > 8):
                     self.moves[key] = None
             except TypeError:
-                # This fixes NoneType object is not subscriptable
-                # It occurs if a piece is at the edge of a board
+                """
+                This fixes NoneType object is not subscriptable
+                It occurs if a piece is at the edge of a board
+                """
                 pass
-        print(f"Debug self.moves {self.moves}")
+        # print(f"Debug self.moves {self.moves}")
         return self.moves
 
 
@@ -100,32 +106,39 @@ class Board():
     
     def _generate_visual_board(self, flashing_position=None):
         """
-        Generates the visual representation of the board, including coordinates on the left side and bottom.
-
+        Function:
+            Generates the visual representation of the board
+        
         Parameters:
-        - flashing_position: Optional. The (x, y) coordinate to be highlighted as flashing.
+        - flashing_position: (x, y) coordinate to be highlighted as flashing.
 
         Description:
         The function iterates through each row and column of the board to build the visual.
         It creates an empty `board_display` string to store the generated visual representation.
 
         For each row (y-coordinate) in reverse order:
-            - The y-coordinate is added to the 'board_display string as the left-side coordinate label.
+            - The y-coordinate is added to the 'board_display string
+              as the left-side coordinate label.
+
             - For each column (x-coordinate) from 1 to self.x_coord:
                 - The `(x, y)` coordinate is assigned to xy_coord.
-                - If `xy_coord` matches the `flashing_position`, the`flashing` variable is set to True, else set to False.
-                - The visual representation of the position is generated using the `_generate_position_visual`
-                function, passing `xy_coord` and `flashing` as arguments.
-                - The generated visual_piece is appended to the `board_display` string.
-            - A newline character is added to the `board_display` string to start a new row.
+                - If `xy_coord` matches the `flashing_position`,
+                  the`flashing` variable is set to True, else set to False.
 
-        After iterating through all rows, the horizontal coordinate labels are added to the `board_display` string.
+                - The visual representation of the position is generated using
+                  the `_generate_position_visual`function, passing `xy_coord`
+                  and `flashing` as arguments.
+
+                - The generated visual_piece is appended to the `board_display` string.
+
+            - A newline character is added to the `board_display`
+              string to start a new row.
+        
+        After iterating through all rows, the horizontal coordinate 
+        labels are added to the `board_display` string.
         
         Returns:
-        - A string representing the visual representation of the board.
-
-        Note:
-        - The `print("\033[H\033[J")` line is a visual trick to clear the terminal screen and make it look cleaner. It can be safely commented out for debugging purposes.
+        - board_display: string representing the entire board
         """
             
         board_display = ""
@@ -142,28 +155,47 @@ class Board():
         board_display += "   "
         for x in range(1, self.x_coord + 1):
             board_display += f" {x} "
-        # print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
+        print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
         return board_display
 
     def _generate_position_visual(self, xy_coord, flashing=False):
         """
-        Purpose:
-        - Generates the visual representation of a specific position on the board.
+       Function:
+        - Generates the board spaces and pieces
+        - Overlays game_piece on spaces as appropriate
+        - Highlights currently selected piece through flashing=True arg
 
         Params:
         - xy_coord: The (x, y) coordinate of the position.
-        - flashing: Optional. Specifies whether the position should be highlighted as flashing.
-
-        Return:
-        - A string representing the visual representation of the position on the board.
+        - flashing: Specifies whether selected piece is flashing.
 
         Logic:
-        - The function checks the `xy_coord` position on the board and determines the visual representation based on the following conditions:
-            - If the position is `None` and belongs to the black spaces, it generates a black tile visual space.
-            - If the position is `None` and belongs to the white spaces, it generates a dark_grey or white tile visual space.
-            - If the position is not `None`, it represents a game piece. The function retrieves the piece and generates the visual representation based on its team.
-                - For white pieces, if `flashing` is True, it generates a flashing white piece representation; otherwise, a normal white piece representation.
-                - For black pieces, if `flashing` is True, it generates a flashing dark grey piece representation; otherwise, a normal dark grey piece representation.
+        - The function checks the `xy_coord` position on the board and 
+          determines the visual representation based on the following conditions:
+
+            - If the position is `None` and belongs to the black spaces,
+              it generates a black tile visual space.
+
+            - If the position is `None` and belongs to the white spaces,
+              it generates a dark_grey or white tile visual space.
+
+            - If the position is not `None`, it represents a game piece.
+              The function retrieves the piece and generates the visual
+              representation based on its team.
+
+                - For white pieces, if `flashing` is True, it generates a
+                  flashing white piece representation;
+                  otherwise, a normal white piece representation.
+                
+                - For black pieces, if `flashing` is True, it generates a
+                  flashing dark grey piece representation;
+                  otherwise, a normal dark grey piece representation.
+
+        Returns:
+        - visual_space for empty spaces
+        - flashing_visual_piece for currently selected piece
+        - non_flashing_visual_piece for non-currently selected piece
+
         """
         if self.xy_coord[xy_coord] is None and (xy_coord in self.black_spaces):  # If empty space on black tile
             background_color = "\033[30m"  # Black option
@@ -184,14 +216,18 @@ class Board():
                 visual_piece = "o"
             if piece.team == "white":
                 if flashing:
-                    return f"[\033[37;5m{visual_piece}\033[0m]"
+                    flashing_visual_piece = f"[\033[37;5m{visual_piece}\033[0m]"
+                    return flashing_visual_piece
                 else:
-                    return f" {visual_piece} "
+                    non_flashing_visual_piece = f" {visual_piece} "
+                    return non_flashing_visual_piece
             if piece.team == "black":
                 if flashing:
-                    return f"[\033[5;90m{visual_piece}\033[0m]"
+                    flashing_visual_piece = f"[\033[5;90m{visual_piece}\033[0m]"
+                    return flashing_visual_piece
                 else:
-                    return f" \033[90m{visual_piece}\033[0m "
+                    non_flashing_visual_piece = f" \033[90m{visual_piece}\033[0m "
+                    return non_flashing_visual_piece
 
     def _place_at_location(self, xy_coord, piece):
         if self.xy_coord[xy_coord] is None:  # If space is empty, place piece and return True
@@ -201,10 +237,6 @@ class Board():
             return False, (f"Invalid move, {self.xy_coord[xy_coord]} is already located at {xy_coord}")
 
     def get_from_location(self, xy_coord):  # Return whatever is at the given x,y coord
-        """
-        Add Defensive logic if provided xy_coord is out of bounds
-        We can use self.xy_coord (dict) or self.black_spaces + self.white_spaces (sorted list)
-        """
         try:
             return self.xy_coord[xy_coord]
         except KeyError:
@@ -220,7 +252,7 @@ class Board():
 
     def move(self, xy_coord, piece): 
         """
-         This is one way to do it, but I could also use the 
+         This is one way to do it, but we could also use the 
          above get + remove to first check if a move if valid
         """
         check = self._place_at_location(xy_coord, piece)
@@ -246,7 +278,7 @@ class Checkers_Board(Board):
         self.all_king_rows = self._create_king_row()
         self.white_side_king_row = self.all_king_rows[0]  # This is (x, 8) row list
         self.black_side_king_row = self.all_king_rows[1]  # This is (x, 1) row list
-    
+
     def board_setup(self):  # Place all Checker Pieces
         white_start_coord_unsort = []
         black_start_coord_unsort = []
@@ -263,7 +295,7 @@ class Checkers_Board(Board):
                     black_start_coord_unsort.append(location)
         white_start_coord = sorted(white_start_coord_unsort, key=lambda y: y[1])
         black_start_coord = sorted(black_start_coord_unsort, key=lambda y: y[1], reverse=True)
-        
+
         for i in range(0, len(white_start_coord)):  # White Piece Placement
             white_xy_coord = (white_start_coord[i])
             white_piece = self.white_pieces[i]
@@ -283,19 +315,19 @@ class Checkers_Board(Board):
             obj = Checkers_Game_Piece(name, i)
             piece_list.append(obj)
         return piece_list
-    
+
     def _create_king_row(self):
         white_side_king_row = []
         black__side_king_row = []
         for x_coord in range(1,9):
             white_side_king_row.append((x_coord, 8))
             black__side_king_row.append((x_coord, 1))
-        
+
         return white_side_king_row, black__side_king_row
 
     def is_regular_move_valid(self, piece):  # Valid Non-King moves
         piece.check_valid_move()  # Update piece.moves
-        if piece.is_king:
+        if piece.is_king: # king_moves represent ability to move in any direction
             nw = piece.moves["move_nw"]  # NW
             ne = piece.moves["move_ne"]  # NE
             sw = piece.moves["move_sw"]  # SW
@@ -323,7 +355,7 @@ class Checkers_Board(Board):
                 if se_space is None:
                     king_moves["move_se"] = True
             return king_moves
-        
+
         elif piece.team == "white":  # White starts Top and must move Down
             sw = piece.moves["move_sw"]  # SW
             se = piece.moves["move_se"]  # SE
@@ -359,14 +391,14 @@ class Checkers_Board(Board):
             return black_moves
 
     def check_for_capture(self, starting_loc, opp_piece):
-        print(f"Debug check_fo_capture starting_loc arg {starting_loc}")
+        # print(f"Debug check_fo_capture starting_loc arg {starting_loc}")
         space_behind = opp_piece.moves[starting_loc]
-        print(f"Debug check_for_capture() space_behind {space_behind}")
+        # print(f"Debug check_for_capture() space_behind {space_behind}")
         if space_behind is not None:
             check_space = self.get_from_location(space_behind)
-            print(f"Debug check_for_capture() check_space {check_space}")
+            # print(f"Debug check_for_capture() check_space {check_space}")
             if check_space is None:
-                print(f"Debug Space at {space_behind} behind {opp_piece} is Empty")
+                # print(f"Debug Space at {space_behind} behind {opp_piece} is Empty")
                 print("You must capture this piece")
                 return True
             else:
@@ -375,8 +407,10 @@ class Checkers_Board(Board):
             return False
 
     def remove_piece_from_game(self, xy_coord): 
-        # Removes piece from the board and its 
-        # respective teams list of pieces
+        """
+        Removes piece from the board and its 
+        respective teams list of pieces
+        """
         piece_to_remove = self.xy_coord[xy_coord]
         name_to_remove = piece_to_remove.name
 
@@ -392,38 +426,15 @@ class Checkers_Board(Board):
 
 
     def check_king_me(self, regular_piece):
+        """
+        Check if a piece is currently on a king_row.
+        If so, update the pieces internal king flag using
+        king_me()
+        """
         if (regular_piece.team == "white") and (regular_piece.xy_coord in self.black_side_king_row): 
-            print("check_king_me_block")
             regular_piece.king_me()
-            print(f"Debug for piece.is_king {regular_piece.is_king}")
+            # print(f"Debug for piece.is_king {regular_piece.is_king}")
         
         elif (regular_piece.team == "black") and (regular_piece.xy_coord in self.white_side_king_row): 
-            print("check_king_me_block")
             regular_piece.king_me()
-            print(f"Debug for piece.is_king {regular_piece.is_king}")
-
-        else:
-            return
-        """
-        Option 1 (Better Idea)
-        When a piece reaches (x,8) or (x,1) we must add the king tag to the piece
-        This allows king pieces to access new functionality in things like
-        check_valid_move or capture_piece to move/capture in all directions
-        Pros:
-        No new objects
-
-        Cons:
-        Rewrite current game logic func to account for new is_king attr. flag
-
-        Option (Worse Idea)
-        During king_me we remove the regular game_piece from the board and replace it 
-        with a king_piece subclass with added functionality.
-        Pros:
-            - New king_piece subclass, new functionality
-            - Seperation of concerns with pieces.
-        Cons:
-            - Write entirely new game logic funcs specifically for kings
-            and reuse a bunch of current regular piece func logic
-            - Will have to add logic check for whether or not selected piece is 
-            king to determine correct proccess_move funcs
-        """
+            # print(f"Debug for piece.is_king {regular_piece.is_king}")

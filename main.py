@@ -1,28 +1,32 @@
 from board.board import *
 
+"""
+Next Steps:
 
-def board_force_capture(all_team_pieces):
-    pass
-    '''
-    I need to have the game force the player to capture
-    a piece if available and not give him a choice to 
-    select a non-capturing piece
+We could likely put the Piece and Board Logic sections within their
+respective subclasses.
 
-    option1
-    We might be able to use get_state() since it 
-    returns a dict of whole board
+We could put Visual Logic block with current _generate_visual
+funcs in Board() Class. We could also take all of the visual code
+and place it in its own class away from Board().
 
-    option2
-    We could iterate through Checkers_Board.white/black_pieces
-    which is a list of piece obj. If piece obj has a valid capturable 
-    move, skip piece selection and make it the only selected piece.
-    You theoritcally can have multiple valid capture moves
-    at the start of your turn. so we make another dict to list all valid 
-    capture moves. This logic already exists in the below funcs so we can
-    retool or pass arg flags.
-    '''
+We can wrap this main.py into a main() to begin and operate
+the turns of the game. Future logic could show players how many
+pieces they have captured, add more info, etc. We need to add an
+end state/win condition. Currently the two possible options are
+1) all pieces from one team are gone, and 2) no valid moves remain (tie).
+
+We should try and implement logging for dev work vs production.
+
+We should also look into adding a cpu opponent, possibly pytorch. But we
+would keep these away from the logic we have currently implemented and import
+it as a player character.
+"""
 
 
+"""
+Visual Logic
+"""
 def visual_display(current_piece):
     # Visual Block
     flashing_position = current_piece.xy_coord
@@ -53,17 +57,17 @@ def process_move(valid_moves, piece, capture=False):
     if (user_input in valid_moves) and (capture is True): # If you can capture do so
         selected_move = valid_moves[user_input]
         capture_coord = piece.moves[user_input]
-        print(f"Debug capture {capture_coord}")
+        # print(f"Debug capture {capture_coord}")
         checkers_board.remove_piece_from_game(capture_coord)  # Remove captured Piece from
         checkers_board.move(selected_move, piece)  # Move Player piece to new coord
         checkers_board.remove_from_location(piece.xy_coord) # Remove Player piece from old coord
-        print(f"Debug selected_move {selected_move}")
-        print(f"Debug piece.moves {piece.moves}")
+        # print(f"Debug selected_move {selected_move}")
+        # print(f"Debug piece.moves {piece.moves}")
         piece.xy_coord = selected_move  # Update (x, y) of piece.xy_coord attr
-        print(f"debug of piece.xy_coord {piece.xy_coord}")
+        # print(f"debug of piece.xy_coord {piece.xy_coord}")
         piece.check_valid_move()  # Update piece.moves to reflect new possible moves
         checkers_board.check_king_me(piece)  # Update piece.is_king if possible
-        print(f"Debug of updated piece.moves {piece.moves}") 
+        # print(f"Debug of updated piece.moves {piece.moves}") 
 
     elif user_input in valid_moves:  # If you can't capture, move regularly
         print(f"You choice was to move to {user_input}")
@@ -80,18 +84,18 @@ def process_move(valid_moves, piece, capture=False):
 
 def check_capturable_moves(selected_piece, team):
     can_this_move = checkers_board.is_regular_move_valid(selected_piece)
-    print(f"Debug for capture can_this_move {can_this_move}")
+    # print(f"Debug for capture can_this_move {can_this_move}")
     capturable_moves = {}
     for move in can_this_move:
         if can_this_move[move] is False:
             check_space = selected_piece.moves[move]
-            print(f"Debug for check_space {check_space}")
+            # print(f"Debug for check_space {check_space}")
             if check_space is not None:
                 opp_piece = checkers_board.get_from_location(check_space)
-                print(f"Debug for opp_piece{opp_piece}")
+                # print(f"Debug for opp_piece{opp_piece}")
                 if opp_piece.team != team:
                     check_capture_condition = checkers_board.check_for_capture(move, opp_piece)
-                    print(f"Debug for check_capture_condition {check_capture_condition}")
+                    # print(f"Debug for check_capture_condition {check_capture_condition}")
                     if check_capture_condition is True:
                         capturable_moves[move] = opp_piece.moves[move]
 
@@ -105,10 +109,37 @@ def player_turn(team, name):
     print(f"Player {name} Turn")
     if team == "white":
         # Add logic to force capture before piece selection
-        process_piece_selection(team, checkers_board.white_pieces)
+        force_capture_pieces = board_force_capture(team, checkers_board.white_pieces)
+        if force_capture_pieces:
+            print(force_capture_pieces)
+            process_piece_selection(team, force_capture_pieces)
+        else:
+            process_piece_selection(team, checkers_board.white_pieces)
     elif team == "black":
         # Add logic to force capture before piece selection
-        process_piece_selection(team, checkers_board.black_pieces)
+        force_capture_pieces = board_force_capture(team, checkers_board.black_pieces)
+        if force_capture_pieces:
+            print(force_capture_pieces)
+            process_piece_selection(team, force_capture_pieces)
+        else:
+            process_piece_selection(team, checkers_board.black_pieces)
+
+
+def board_force_capture(team, all_team_pieces):
+    # print("Debug board_force_capture() block")
+    force_captures_list = []
+    
+    for piece in all_team_pieces: # iterate through all possible pieces and potential captures
+        capturable_move = check_capturable_moves(piece, team)
+        if capturable_move:
+            force_captures_list.append(piece)
+    
+    if force_captures_list: # If dict contains value captures return it
+        # print(f"Debug list_of_force_captures: {force_captures_list}")
+        return force_captures_list
+
+    else: # Dict has no valid captures. Return False
+        return False
 
 
 def process_piece_selection(team, pieces, recursion=False):
@@ -165,6 +196,9 @@ def cycle_through_pieces(list_of_pieces): # Allow player to cycle through all av
 
     return selected_piece
 
+"""
+Main() for Checkers Game
+"""
 
 # Generate Board & Pieces
 checkers_board = Checkers_Board()
