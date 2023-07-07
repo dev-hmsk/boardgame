@@ -63,7 +63,8 @@ def process_move(valid_moves, piece, capture=False):
         checkers_board.remove_from_location(piece.xy_coord) # Remove Player piece from old coord
         # print(f"Debug selected_move {selected_move}")
         # print(f"Debug piece.moves {piece.moves}")
-        piece.xy_coord = selected_move  # Update (x, y) of piece.xy_coord attr
+        # piece.xy_coord = selected_move  # Update (x, y) of piece.xy_coord attr
+        piece.update_position(selected_move) # Update (x, y) of piece.xy_coord attr
         # print(f"debug of piece.xy_coord {piece.xy_coord}")
         piece.check_valid_move()  # Update piece.moves to reflect new possible moves
         checkers_board.check_king_me(piece)  # Update piece.is_king if possible
@@ -81,7 +82,8 @@ def process_move(valid_moves, piece, capture=False):
         selected_move = piece.moves[user_input]
         checkers_board.move(selected_move, piece)  # Move piece to (x, y) location
         checkers_board.remove_from_location(piece.xy_coord)  # Remove piece from board at its previous (x, y)
-        piece.xy_coord = selected_move  # Update (x, y) of piece.xy_coord attr
+        # piece.xy_coord = selected_move  # Update (x, y) of piece.xy_coord attr
+        piece.update_position(selected_move) # Update (x, y) of piece.xy_coord attr
         piece.check_valid_move()  # Update piece.moves to reflect new possible moves
         checkers_board.check_king_me(piece)  # Update piece.is_king if possible
     else:
@@ -220,7 +222,7 @@ Main() for Checkers Game
 # Generate Board & Pieces
 checkers_board = Checkers_Board()
 checkers_board.board_setup()
-print(checkers_board.xy_coord)
+# print(checkers_board.xy_coord)
 # print(checkers_board.visual)
 # print(checkers_board.get_state())
 
@@ -230,6 +232,6 @@ while is_game_active is True:
     WHITE_TEAM = "white"
     BLACK_TEAM = "black"
     player_1_name = "Hans"
-    player_2_name = "Wes"
+    player_2_name = "Angel"
     turn1 = player_turn(WHITE_TEAM, player_1_name)
     turn2 = player_turn(BLACK_TEAM, player_2_name)

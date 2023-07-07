@@ -8,6 +8,8 @@ class Game_Piece():
     def update_position(self, xy_coord):
         self.xy_coord = xy_coord
 
+    def give_position(self):
+        return self.xy_coord
 
 class Checkers_Game_Piece(Game_Piece):
     def __init__(self, color, number):
@@ -155,7 +157,7 @@ class Board():
         board_display += "   "
         for x in range(1, self.x_coord + 1):
             board_display += f" {x} "
-        # print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
+        print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
         return board_display
 
     def _generate_position_visual(self, xy_coord, flashing=False):
@@ -234,7 +236,8 @@ class Board():
             self.xy_coord[xy_coord] = piece
             return True, (f"Valid move, {piece.name} has been placed at {xy_coord}")
         else:  # If space is full, return False
-            return False, (f"Invalid move, {self.xy_coord[xy_coord]} is already located at {xy_coord}")
+            return False, (f"Bug #1 Invalid move, {self.xy_coord[xy_coord]} is already located at {xy_coord}")
+                # Above is only triggered if something goes wrong
 
     def get_from_location(self, xy_coord):  # Return whatever is at the given x,y coord
         try:
