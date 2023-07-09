@@ -231,3 +231,4 @@ while is_game_active is True:
     player_2_name = "Wes"
     turn1 = player_turn(WHITE_TEAM, player_1_name)
     turn2 = player_turn(BLACK_TEAM, player_2_name)
+#test comment

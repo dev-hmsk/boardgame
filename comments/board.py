@@ -438,3 +438,4 @@ class Checkers_Board(Board):
         elif (regular_piece.team == "black") and (regular_piece.xy_coord in self.white_side_king_row): 
             regular_piece.king_me()
             # print(f"Debug for piece.is_king {regular_piece.is_king}")
+# test comment
