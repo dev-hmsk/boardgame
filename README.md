@@ -2,13 +2,13 @@
 Checkers Game is a console-based implementation of the classic board game Checkers (also known as Draughts). The game allows two players to take turns and play against each other. The game is played on an 8x8 board with alternating dark and light squares. Players move their pieces diagonally on the board, capturing the opponent's pieces by jumping over them.
 
 ### Getting Started
-To play the game, follow these steps:
+- To play the game, follow these steps:
 
-Make sure you have Python 3.x installed on your system.
-Clone or download this repository to your local machine.
-Open a terminal or command prompt and navigate to the downloaded repository's directory.
-How to Play
-Run the main.py script to start the game.
+  1. Make sure you have Python 3.x installed on your system.
+  2. Clone or download this repository to your local machine.
+  3. Open a terminal or command prompt and navigate to the downloaded repository's directory.
+#### How to Play
+- Run the main.py script to start the game.
 
 ```python main.py```
 
