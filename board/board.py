@@ -50,7 +50,7 @@ class Checkers_Game_Piece(Game_Piece):
                     self.moves[key] = None
             except TypeError:
                 """
-                This fixes NoneType object is not subscriptable
+                This fixes "NoneType object is not subscriptable"
                 It occurs if a piece is at the edge of a board
                 """
                 pass
@@ -155,7 +155,7 @@ class Board():
         board_display += "   "
         for x in range(1, self.x_coord + 1):
             board_display += f" {x} "
-        # print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
+        print("\033[H\033[J")  # Visual trick to make terminal look cleaner. Can be safely commented out to debug
         return board_display
 
     def _generate_position_visual(self, xy_coord, flashing=False):
