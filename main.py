@@ -51,8 +51,28 @@ def show_valid_moves(valid_moves): # Fancy Print Statement for valid_moves
 
 def process_move(valid_moves, piece, capture=False):
     player_options = show_valid_moves(valid_moves)
-    print(f"Here are your valid moves: {player_options}")
+    user_int_to_move_dict = {range_idx: item for range_idx, item in enumerate(player_options)} # Create conversion dictionary of integers to valid moves
+    
+    print("Here are your valid moves: ")
+    for key, value in user_int_to_move_dict.items():
+        print(f"Type in: {value} or {key}")
     user_input = input("Make a choice: ")
+    user_input = user_input.lower().strip() 
+
+    """
+    Check if user_input can be made into int, otherwise pass with the ValueError exception. 
+    Otherwise compare int against the keys in the user_input_dict 
+    and set user_input as the value of the given key. 
+    This allows the user to either type in the move or use integers
+    """
+    try:
+        user_input_int = int(user_input) 
+        if user_input_int in user_int_to_move_dict:
+            print(user_int_to_move_dict[user_input_int])
+            user_input = user_int_to_move_dict[user_input_int]
+
+    except ValueError:
+        pass
     
     if (user_input in valid_moves) and (capture is True): # If you can capture do so
         selected_move = valid_moves[user_input]
